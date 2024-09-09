@@ -1,6 +1,7 @@
 SRC	=	$(addsuffix .c,		\
 		$(addprefix src/,	\
 			main			\
+			valid_file		\
 		))
 
 NAME	= famine
@@ -13,10 +14,14 @@ CC		= gcc
 
 INCLUDE = -Iinclude/
 
-CFLAGS	=  -Wall -Werror -Wextra -pipe ${INCLUDE} -O3 -g3 #-fsanitize=address
+CFLAGS	= -Wall -Werror -Wextra -pipe ${INCLUDE} -O3 -g3 #-fsanitize=address
 
-all: ${NAME}
+all: debug
 
+debug: CFLAGS += -DDEBUG
+debug: fclean ${NAME}
+
+prod: ${NAME}
 
 .obj/%.o: src/%.c
 	@${CC} ${CFLAGS} -c $< -o ${<:src/%.c=.obj/%.o}
@@ -39,4 +44,4 @@ fclean:
 re: fclean all
 
 
-.PHONY: all clean fclean  re
+.PHONY: all clean fclean re debug
