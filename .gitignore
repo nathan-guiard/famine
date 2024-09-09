@@ -1,0 +1,7 @@
+# binaries
+.obj/*.o
+famine
+
+# misc
+.vscode
+*test*
