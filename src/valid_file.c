@@ -6,7 +6,7 @@
 /*   By: nguiard <nguiard@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/09 10:40:41 by nguiard           #+#    #+#             */
-/*   Updated: 2024/09/09 11:23:56 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/09/10 03:17:01 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,11 +24,15 @@ bool	valid_file(FILE **f, str filename) {
 		return true;
 	}
 
-	if (fread(&elf_header, sizeof(Elf64_Ehdr), 1, *f) != sizeof(Elf64_Ehdr)) {
+	if (fread(&elf_header, sizeof(Elf64_Ehdr), 1, *f) != 1) {
 		printf("File shorter than an ELF header\n");
 		return true;
 	}
-	
+
+	if (strncmp((const char *)elf_header.e_ident, "\x7F" "ELF", 4) != 0) {
+		printf("Not an ELF file");
+		return true;
+	}
 
 	if (elf_header.e_ident[4] != ELFCLASS64) {
 		printf("Not 64 bit\n");

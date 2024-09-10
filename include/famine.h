@@ -6,7 +6,7 @@
 /*   By: nguiard <nguiard@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/09 03:01:42 by nguiard           #+#    #+#             */
-/*   Updated: 2024/09/09 11:20:12 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/09/10 03:03:59 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <elf.h>
 #include <stdbool.h>
+#include <string.h>
 
 typedef	char * str;
 
