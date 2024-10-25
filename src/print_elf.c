@@ -6,13 +6,13 @@
 /*   By: nguiard <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/25 15:44:08 by nguiard           #+#    #+#             */
-/*   Updated: 2024/10/25 17:20:48 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/10/25 17:46:09 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "famine.h"
 
-static void	print_part(const byte *raw, size_t size, const char *label, const size_t end, bool quick);
+static void	print_part(const byte *raw, size_t size, const char *label, const size_t begin, bool quick);
 static void	print_line(const byte *raw, const long size, const char *label, const long label_size);
 static str	elf_header_label(Elf64_Ehdr header);
 
@@ -21,36 +21,49 @@ static str	elf_header_label(Elf64_Ehdr header);
 void	print_elf(FILE * const f) {
 	Elf64_Ehdr	elf_header;
 	Elf64_Phdr	prog_header;
+	Elf64_Shdr	section_header;
 	size_t		current_offset = 0;
 	str			elf_label;
 
 	fread(&elf_header, sizeof(Elf64_Ehdr), 1, f); 
-	current_offset += sizeof(Elf64_Ehdr);
 
 	printf("\033[32m");
-	printf("+--------------------------------------------------+ 0x00000000\n");
 
 	elf_label = elf_header_label(elf_header);
 	print_part((const byte *)&elf_header, sizeof(Elf64_Ehdr), elf_label, current_offset, false);
+	current_offset += sizeof(Elf64_Ehdr);
 
+	fseek(f, elf_header.e_phoff, SEEK_SET);
+	current_offset = elf_header.e_phoff;
 	fread(&prog_header, sizeof(Elf64_Phdr), 1, f); 
-	current_offset += sizeof(Elf64_Phdr);
 
 	printf("\033[33m");
 	print_part((const byte *)&prog_header, sizeof(Elf64_Phdr), "Program Header Table", current_offset, false);
+	current_offset += sizeof(Elf64_Phdr);
+
+	fseek(f, elf_header.e_shoff, SEEK_SET);
+	current_offset = elf_header.e_shoff;
+	fread(&section_header, sizeof(Elf64_Shdr), 1, f); 
+
+	printf("\033[34m");
+	print_part((const byte *)&section_header, sizeof(Elf64_Shdr), "Section Header Table", current_offset, false);
+	current_offset += sizeof(Elf64_Shdr);
 }
 
-static void	print_part(const byte *raw, size_t size, const char *label, const size_t end, bool quick) {
+
+static void	print_part(const byte *raw, size_t size, const char *label, const size_t begin, bool quick) {
+
 	size_t	lines = size / 16 + (size % 16 ? 1 : 0);
 	size_t	label_size = strlen(label);
 
 	(void)quick;
 
+	printf("+--------------------------------------------------+ 0x%08x\n", (unsigned int)begin);
 	for (size_t i = 0; i < lines; i++) {
 		print_line(raw + (i * 16), size - (i * 16),
 			 label ? label + (i * LABEL_PER_LINE) : NULL, label_size - (i * LABEL_PER_LINE));
 	}
-	printf("+--------------------------------------------------+ 0x%08x\n", (unsigned int)end);
+	printf("+--------------------------------------------------+ 0x%08x\n", (unsigned int)(begin + size));
 
 }
 
