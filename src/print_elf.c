@@ -6,7 +6,7 @@
 /*   By: nguiard <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/25 15:44:08 by nguiard           #+#    #+#             */
-/*   Updated: 2024/10/28 13:18:11 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/10/28 14:59:58 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,9 @@ void	print_elf(FILE * const f) {
 	size_t		current_offset = 0;
 	str			label;
 
-	fread(&elf_header, sizeof(Elf64_Ehdr), 1, f); 
+	fseek(f, 0, SEEK_SET);
+
+	fread(&elf_header, sizeof(Elf64_Ehdr), 1, f);
 
 	printf("\033[32m");
 

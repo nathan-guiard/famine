@@ -2,6 +2,9 @@
 .obj/*.o
 famine
 
+# Test executable
+exemple/hello_world
+
 # misc
 .vscode
 *test*

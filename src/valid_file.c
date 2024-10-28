@@ -6,7 +6,7 @@
 /*   By: nguiard <nguiard@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/09 10:40:41 by nguiard           #+#    #+#             */
-/*   Updated: 2024/09/10 03:17:01 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/10/28 14:31:06 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 bool	valid_file(FILE **f, str filename) {
 	Elf64_Ehdr	elf_header;
 
-	*f = fopen(filename, "r");
+	*f = fopen(filename, "rb+");
 
 	if (*f == NULL) {
 		printf("Could not open %s: ", filename);
