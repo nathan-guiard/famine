@@ -6,7 +6,7 @@
 /*   By: nguiard <nguiard@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/09 03:01:26 by nguiard           #+#    #+#             */
-/*   Updated: 2024/10/25 16:32:13 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/10/28 13:38:44 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,5 +28,5 @@ int main(int argc, char **argv) {
 
 	fseek(f, 0, 0);
 
-	print_elf(f);
+	//print_elf(f);
 }

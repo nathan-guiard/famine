@@ -6,7 +6,7 @@
 /*   By: nguiard <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/25 15:44:08 by nguiard           #+#    #+#             */
-/*   Updated: 2024/10/25 17:46:09 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/10/28 13:18:11 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 static void	print_part(const byte *raw, size_t size, const char *label, const size_t begin, bool quick);
 static void	print_line(const byte *raw, const long size, const char *label, const long label_size);
 static str	elf_header_label(Elf64_Ehdr header);
+static str	prog_header_label(Elf64_Phdr header);
 
 #define LABEL_PER_LINE 42
 
@@ -23,23 +24,30 @@ void	print_elf(FILE * const f) {
 	Elf64_Phdr	prog_header;
 	Elf64_Shdr	section_header;
 	size_t		current_offset = 0;
-	str			elf_label;
+	str			label;
 
 	fread(&elf_header, sizeof(Elf64_Ehdr), 1, f); 
 
 	printf("\033[32m");
 
-	elf_label = elf_header_label(elf_header);
-	print_part((const byte *)&elf_header, sizeof(Elf64_Ehdr), elf_label, current_offset, false);
+	label = elf_header_label(elf_header);
+	print_part((const byte *)&elf_header, sizeof(Elf64_Ehdr), label, current_offset, false);
+	free(label);
 	current_offset += sizeof(Elf64_Ehdr);
 
 	fseek(f, elf_header.e_phoff, SEEK_SET);
-	current_offset = elf_header.e_phoff;
-	fread(&prog_header, sizeof(Elf64_Phdr), 1, f); 
-
 	printf("\033[33m");
-	print_part((const byte *)&prog_header, sizeof(Elf64_Phdr), "Program Header Table", current_offset, false);
-	current_offset += sizeof(Elf64_Phdr);
+	current_offset = elf_header.e_phoff;
+	for (int i = 0; i < elf_header.e_phnum; i++) {
+		fread(&prog_header, elf_header.e_phentsize, 1, f); 
+
+		label = prog_header_label(prog_header);
+		print_part((const byte *)&prog_header, sizeof(Elf64_Phdr), label, current_offset, false);
+		free(label);
+		current_offset += elf_header.e_phentsize;
+	}
+
+	fseek(f, elf_header.e_shstrndx, SEEK_SET);
 
 	fseek(f, elf_header.e_shoff, SEEK_SET);
 	current_offset = elf_header.e_shoff;
@@ -97,7 +105,51 @@ static str	elf_header_label(Elf64_Ehdr header) {
 	if (s == NULL)
 		return s;
 
-	sprintf(s, "Entry point: 0x%08x", (unsigned int)header.e_entry);
+	sprintf(s, "Entry point: 0x%08x | Phdrs: %d", (unsigned int)header.e_entry, header.e_phnum);
+
+	return s;
+}
+
+static str	prog_header_label(Elf64_Phdr header) {
+	str	s;
+	str type = NULL;
+
+	s = malloc(42 * 4);
+	if (s == NULL)
+		return s;
+
+	switch (header.p_type) {
+		case PT_NULL:
+			type = "NULL";
+			break;
+		case PT_LOAD:
+			type = "LOAD";
+			break;
+		case PT_DYNAMIC:
+			type = "DYNAMIC";
+			break;
+		case PT_INTERP:
+			type = "INTERP";
+			break;
+		case PT_NOTE:
+			type = "NOTE";
+			break;
+		case PT_SHLIB:
+			type = "SHLIB";
+			break;
+		case PT_PHDR:
+			type = "PHDR";
+			break;
+		case PT_TLS:
+			type = "TLS";
+			break;
+	}
+
+	if (type) {
+		sprintf(s, "Type: %s | Offset: 0x%08lx", type, header.p_offset);
+	} else {
+		sprintf(s, "Type: %x | Offset: 0x%08lx", header.p_type, header.p_offset);
+	}
 
 	return s;
 }
