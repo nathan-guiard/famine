@@ -6,7 +6,7 @@
 #    By: nguiard <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/10/25 15:46:23 by nguiard           #+#    #+#              #
-#    Updated: 2024/10/28 15:20:37 by nguiard          ###   ########.fr        #
+#    Updated: 2024/10/29 11:30:15 by nguiard          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,6 +17,7 @@ SRC	=	$(addsuffix .c,		\
 			file_operations	\
 			print_elf		\
 			program_header	\
+			add_segment		\
 		))
 
 NAME	= famine
