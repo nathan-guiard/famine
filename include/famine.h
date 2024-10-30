@@ -14,6 +14,9 @@
 #define FAMINE_H
 
 #include <stdint.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 typedef	char *			str;
 typedef	unsigned char	byte;
@@ -29,7 +32,7 @@ typedef	unsigned char	byte;
 # define perror(x) perror(x)
 # define fflush(x) fflush(x)
 
-# define FILE_LINE(x) __FILE__ ":%d " x, __LINE__
+# define FILE_LINE(x) __FILE__ ":%d : " x, __LINE__
 
 #else
 

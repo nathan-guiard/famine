@@ -6,7 +6,7 @@
 /*   By: nguiard <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/30 13:38:07 by nguiard           #+#    #+#             */
-/*   Updated: 2024/10/30 15:09:14 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/10/30 16:19:16 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,9 @@
 
 //	Syscall numbers
 #define SYS_WRITE	1	
-#define SYS_MMAP	1	
-#define SYS_EXIT	60	
-
+#define SYS_OPEN	2
+#define SYS_FSTAT	5
+#define SYS_EXIT	60
 
 //	Raw syscalls
 
@@ -32,6 +32,22 @@
 		: [a] "r" (first), 			\
 			[num] "r" (sysnum)		\
 		: "rdi", "rax"				\
+	)
+
+#define sys2(ret, sysnum, first, second) \
+	asm(										\
+		".intel_syntax noprefix\n"				\
+		"mov rsi, %[b]\n"						\
+		"mov rdi, %[a]\n"						\
+		"mov rax, %[num]\n"						\
+		"syscall\n"								\
+		"mov %0, rax\n"							\
+		".att_syntax prefix\n"					\
+		: "=r" (ret)							\
+		: [a] "r" (first),						\
+			[b] "r" (second),					\
+			[num] "r" (sysnum)					\
+		: "rdi", "rsi", "rdx", "rax"			\
 	)
 
 #define sys3(ret, sysnum, first, second, third) \
@@ -54,16 +70,17 @@
 
 //	Syscall functions
 
-// uintXX_t	exit_status
 #define exit(exit_status) \
 		sys1_noret((uint64_t)SYS_EXIT, (uint64_t)exit_status)
 
-// uint64_t	ret	-> return value placeholder
-// uintXX_t	fd
-// void *	data
-// uintXX_t	len
 #define write(ret, fd, data, len) \
 		sys3(ret, (uint64_t)SYS_WRITE, (uint64_t)fd, (void *)data, (uint64_t)len)
+
+#define open(ret, path, mode) \
+		sys2(ret, (uint64_t)SYS_OPEN, (void *)path, (uint64_t)mode)
+
+#define fstat(ret, path, statbuf) \
+		sys2(ret, (uint64_t)SYS_FSTAT, (void *)path, (uint64_t)statbuf)
 
 // See mmap below
 #define mmap_real(ret, addr, len, prot, flags, fd, offset)	\
