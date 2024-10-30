@@ -6,18 +6,13 @@
 #    By: nguiard <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/10/25 15:46:23 by nguiard           #+#    #+#              #
-#    Updated: 2024/10/29 11:30:15 by nguiard          ###   ########.fr        #
+#    Updated: 2024/10/30 14:25:40 by nguiard          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 SRC	=	$(addsuffix .c,		\
 		$(addprefix src/,	\
 			main			\
-			valid_file		\
-			file_operations	\
-			print_elf		\
-			program_header	\
-			add_segment		\
 		))
 
 NAME	= famine
@@ -30,7 +25,7 @@ CC		= gcc
 
 INCLUDE = -Iinclude/
 
-CFLAGS	= -Wall -Werror -Wextra -pipe ${INCLUDE} -O3 -g3 #-fsanitize=address
+CFLAGS	= -Wall -Werror -Wextra -pipe ${INCLUDE} -g3 #-fsanitize=address
 
 all: debug
 
@@ -45,7 +40,7 @@ prod: ${NAME}
 
 ${NAME}: ${OBJ}
 	@echo "Compiling ${NAME}"
-	@${CC} ${OBJ} ${CFLAGS} -o ${NAME}
+	@${CC} -nostartfiles ${OBJ} ${CFLAGS} -o ${NAME}
 	@echo "${NAME} compiled"
 
 
