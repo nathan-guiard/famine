@@ -6,7 +6,7 @@
 /*   By: nguiard <nguiard@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/09 03:01:42 by nguiard           #+#    #+#             */
-/*   Updated: 2024/10/30 12:52:57 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/10/30 18:34:46 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,17 @@
 typedef	char *			str;
 typedef	unsigned char	byte;
 
+typedef struct dirent {
+	unsigned long	d_ino;
+	unsigned long	d_off;
+	unsigned short	d_reclen;
+	char			d_name[256];
+}	dirent;
+
 #include "asm_macros.h"
+
+//	Main
+size_t	ft_strlen(str buff);
 
 // Debug purpose
 #ifdef DEBUG

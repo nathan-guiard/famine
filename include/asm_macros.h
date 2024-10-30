@@ -6,7 +6,7 @@
 /*   By: nguiard <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/30 13:38:07 by nguiard           #+#    #+#             */
-/*   Updated: 2024/10/30 16:19:16 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/10/30 17:12:32 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,13 +14,15 @@
 #define ASM_MACROS_H
 
 //	Syscall numbers
-#define SYS_WRITE	1	
-#define SYS_OPEN	2
-#define SYS_FSTAT	5
-#define SYS_EXIT	60
+#define SYS_WRITE		1
+#define SYS_OPEN		2
+#define SYS_CLOSE		3
+#define SYS_FSTAT		5
+#define SYS_MUNMAP		11
+#define SYS_EXIT		60
+#define SYS_GETDENTS	78
 
 //	Raw syscalls
-
 #define sys1_noret(sysnum, first)	\
 	asm(							\
 		".intel_syntax noprefix\n"	\
@@ -47,7 +49,7 @@
 		: [a] "r" (first),						\
 			[b] "r" (second),					\
 			[num] "r" (sysnum)					\
-		: "rdi", "rsi", "rdx", "rax"			\
+		: "rdi", "rsi", "rax"					\
 	)
 
 #define sys3(ret, sysnum, first, second, third) \
@@ -73,6 +75,9 @@
 #define exit(exit_status) \
 		sys1_noret((uint64_t)SYS_EXIT, (uint64_t)exit_status)
 
+#define close(fd) \
+		sys1_noret((uint64_t)SYS_CLOSE, (uint64_t)fd)
+
 #define write(ret, fd, data, len) \
 		sys3(ret, (uint64_t)SYS_WRITE, (uint64_t)fd, (void *)data, (uint64_t)len)
 
@@ -81,6 +86,12 @@
 
 #define fstat(ret, path, statbuf) \
 		sys2(ret, (uint64_t)SYS_FSTAT, (void *)path, (uint64_t)statbuf)
+
+#define getdents(ret, fd, buff, size) \
+		sys3(ret, (uint64_t)SYS_GETDENTS, (uint64_t)fd, (void *)buff, (uint64_t)size)
+
+#define munmap(ret, addr, len) \
+		sys2(ret, (uint64_t)SYS_MUNMAP, (void *)addr, (uint64_t)len)
 
 // See mmap below
 #define mmap_real(ret, addr, len, prot, flags, fd, offset)	\
