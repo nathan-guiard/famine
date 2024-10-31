@@ -6,7 +6,7 @@
 /*   By: nguiard <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/31 13:23:11 by nguiard           #+#    #+#             */
-/*   Updated: 2024/10/31 13:30:01 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/10/31 16:20:09 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,4 +32,9 @@ bool	ft_memcmp(const byte *a, const byte *b, size_t size) {
 	}
 
 	return true;
+}
+
+void	ft_memcpy(byte *dest, const byte *src, size_t size) {
+	for (size_t i = 0; i < size; i++)
+		dest[i] = src[i];
 }
