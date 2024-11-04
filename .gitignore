@@ -7,5 +7,6 @@ exemple/hello_world
 
 # misc
 .vscode
-*test*
+test*
+*test
 todolist.md
