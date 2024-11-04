@@ -1,5 +1,6 @@
 all:
-	rm hello_world
-	gcc -o hello_world hello_world.c
-	chmod 777 hello_world
+	mkdir -p /tmp/test1 /tmp/test2
+	rm -f /tmp/test1/* /tmp/test2/*
+	gcc -o /tmp/test1/hello_world hello_world.c
+	chmod 777 /tmp/test1/hello_world
 

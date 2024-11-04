@@ -6,7 +6,7 @@
 /*   By: nguiard <nguiard@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/09 03:01:42 by nguiard           #+#    #+#             */
-/*   Updated: 2024/10/31 15:25:21 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/04 11:10:42 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,8 @@
 #include <stdbool.h>
 #include <elf.h>
 
-typedef	char *			str;
-typedef	unsigned char	byte;
+typedef	char *				str;
+typedef	unsigned char		byte;
 
 #define SIGNATURE		"Infected by adben-mc and nguiard ;)"
 #define SIGNATURE_LEN	36
