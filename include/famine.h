@@ -19,6 +19,7 @@
 #include <fcntl.h>
 #include <stdbool.h>
 #include <elf.h>
+#include <stddef.h>
 
 typedef	char *				str;
 typedef	unsigned char		byte;
@@ -40,6 +41,7 @@ typedef struct elf_data {
 	byte		*file;
 	size_t		signature_offset;
 	size_t		infection_offset;
+	size_t		original_entry_point;
 }	elf_data;
 
 #define DT_UNKNOWN  0   // Unknown file type
@@ -84,7 +86,7 @@ bool	infect(const str path);
 
 #else
 
-# define printf(x)
+# define printf(...)
 # define perror(x)
 # define fflush(x)
 

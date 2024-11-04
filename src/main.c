@@ -37,8 +37,9 @@ void _start() {
 		open(fd, dir_name, O_RDONLY);	
 
 		getdents(ret, fd, buff, BUFF_SIZE);
-		if (ret < 0)
+		if (ret < 0) {
 			printf(FILE_LINE("gedents() \033[31mfail:\033[0m %ld\n"), ret);
+		}
 
 		while (ret > 0) {
 			int64_t	d_offset = 0;
@@ -65,8 +66,9 @@ void _start() {
 			}
 
 			getdents(ret, fd, buff, BUFF_SIZE);
-			if (ret < 0)
+			if (ret < 0) {
 				printf(FILE_LINE("gedents() \033[31mfail:\033[0m %ld\n"), ret);
+			}
 		}
 
 		for (size_t i = 0; i < len_dir + 1; i++)
