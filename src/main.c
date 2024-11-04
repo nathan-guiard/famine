@@ -6,7 +6,7 @@
 /*   By: nguiard <nguiard@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/09 03:01:26 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/04 11:12:20 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/04 14:43:01 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,8 +74,6 @@ void _start() {
 		for (size_t i = 0; i < len_dir + 1; i++)
 			max_path[i] = 0;
 	}
-
-	fflush(stdout);
 
 	exit(0);
 }
