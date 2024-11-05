@@ -15,6 +15,7 @@ SRC	=	$(addsuffix .c,		\
 			main			\
 			utils			\
 			infection		\
+			profiling		\
 		))
 
 NAME	= famine

