@@ -6,7 +6,7 @@
 #    By: nguiard <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/10/25 15:46:23 by nguiard           #+#    #+#              #
-#    Updated: 2024/11/05 11:52:37 by nguiard          ###   ########.fr        #
+#    Updated: 2024/11/05 15:54:18 by nguiard          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,7 +22,7 @@ NAME	= famine
 
 SHELL	= /bin/zsh
 
-OBJ		= ${SRC:src/%.c=.obj/%.o}
+OBJ		= ${SRC:src/%.c=.obj/%.o} .obj/return.o
 
 CC		= gcc
 
@@ -40,6 +40,9 @@ prod: ${NAME}
 .obj/%.o: src/%.c
 	@${CC} ${CFLAGS} -c $< -o ${<:src/%.c=.obj/%.o}
 
+.obj/%.o: src/%.s
+	@nasm -f elf64 -o ${<:src/%.s=.obj/%.o} $<
+	@chmod o+wr ${<:src/%.s=.obj/%.o}
 
 ${NAME}: ${OBJ}
 	@echo "Compiling ${NAME}"

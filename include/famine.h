@@ -86,6 +86,9 @@ bool		infect(profiling *this, const str path);
 //	Profiling
 profiling	get_profiling(byte *start_rip);
 
+//	return.s
+void		the_point_of_no_return(bool original);
+
 // Debug purpose
 #ifdef DEBUG
 

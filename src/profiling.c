@@ -6,7 +6,7 @@
 /*   By: nguiard <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 16:58:52 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/05 14:13:12 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/05 17:30:36 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,16 @@ profiling	get_profiling(byte *start_rip) {
 	size_t		i = 0;
 	ret.start_rip = start_rip;
 
-	for (; ((uint128_t *)start_rip)[i]; i++)
-		i++;
+	for (; ((uint128_t *)start_rip)[i] + ((uint128_t *)start_rip)[i + 1]; i++)
+		;
 
-	ret.size = i * sizeof(uint128_t);
+	i *= sizeof(uint128_t);
+
+	for (; start_rip[i] == 0; i--)
+		;
+	
+	ret.size = i + 1;
+	printf("%lx [0x%02x]\n", 0x1030 + ret.size, start_rip[ret.size]);
 
 	if (*(start_rip + ret.size + SIGNATURE_OFFSET) == 0) {
 		ret.original = true;

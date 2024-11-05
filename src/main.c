@@ -6,7 +6,7 @@
 /*   By: nguiard <nguiard@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/09 03:01:26 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/04 14:43:01 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/05 15:14:36 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,8 +89,7 @@ void _start() {
 			max_path[i] = 0;
 	}
 
-	if (this.original)
-		exit(0);
-	else
-		exit(50);
+	write(ret, 1, &ret, 1);
+
+	the_point_of_no_return(this.original);
 }
