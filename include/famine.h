@@ -6,7 +6,7 @@
 /*   By: nguiard <nguiard@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/09 03:01:42 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/05 12:03:21 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/05 12:23:53 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,8 @@ typedef struct dirent {
 typedef struct profiling {
 	byte	*start_rip;
 	size_t	size;
+	byte	*signature;
+	bool	original;
 }	profiling;
 
 typedef struct elf_data {

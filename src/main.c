@@ -25,7 +25,7 @@ void _start() {
 	uint64_t	directories[] = {0x7365742f706d742f, 0x003174, 0x7365742f706d742f, 0x003274, 0, 0};
 	char		max_path[513];
 	dirent		*d;
-	uint64_t	string = 0x000a333333333333;
+	uint64_t	string = 0x000a303132333435;
 	profiling	this;
 	
 	start_rip -= 0x12;
