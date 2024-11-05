@@ -6,7 +6,7 @@
 /*   By: nguiard <nguiard@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/09 03:01:42 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/04 11:10:42 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/05 12:03:21 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,13 +71,15 @@ typedef struct elf_data {
 
 #include "asm_macros.h"
 
+#define SIGNATURE_OFFSET	32
+
 //	Utils
-size_t	ft_strlen(str buff);
-bool	ft_memcmp(const byte *a, const byte *b, size_t size);
-void	ft_memcpy(byte *dest, const byte *src, size_t size);
+size_t		ft_strlen(str buff);
+bool		ft_memcmp(const byte *a, const byte *b, size_t size);
+void		ft_memcpy(byte *dest, const byte *src, size_t size);
 
 //	Infection
-bool	infect(profiling *this, const str path);
+bool		infect(profiling *this, const str path);
 
 //	Profiling
 profiling	get_profiling(byte *start_rip);

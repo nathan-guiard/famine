@@ -6,16 +6,16 @@
 #    By: nguiard <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/10/25 15:46:23 by nguiard           #+#    #+#              #
-#    Updated: 2024/10/30 14:25:40 by nguiard          ###   ########.fr        #
+#    Updated: 2024/11/05 11:52:37 by nguiard          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 SRC	=	$(addsuffix .c,		\
 		$(addprefix src/,	\
 			main			\
+			profiling		\
 			utils			\
 			infection		\
-			profiling		\
 		))
 
 NAME	= famine

