@@ -6,7 +6,7 @@
 /*   By: nguiard <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 16:58:52 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/05 17:30:36 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/05 17:45:47 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,6 @@ profiling	get_profiling(byte *start_rip) {
 		;
 	
 	ret.size = i + 1;
-	printf("%lx [0x%02x]\n", 0x1030 + ret.size, start_rip[ret.size]);
 
 	if (*(start_rip + ret.size + SIGNATURE_OFFSET) == 0) {
 		ret.original = true;

