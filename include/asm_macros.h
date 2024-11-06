@@ -6,7 +6,7 @@
 /*   By: nguiard <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/30 13:38:07 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/06 10:53:08 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/06 12:55:26 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 #define SYS_MUNMAP		11
 #define SYS_MREMAP		25
 #define SYS_EXIT		60
+#define SYS_FTRUNCATE	77
 #define SYS_GETDENTS	78
 
 #define get_rip(instruction_pointer)	\
@@ -122,6 +123,9 @@
 
 #define munmap(ret, addr, len) \
 		sys2(ret, (uint64_t)SYS_MUNMAP, (void *)addr, (uint64_t)len)
+
+#define ftruncate(ret, fd, size) \
+		sys2(ret, (uint64_t)SYS_FTRUNCATE, (void *)fd, (uint64_t)size)
 
 // See mmap below
 #define mmap_real(ret, addr, len, prot, flags, fd, offset)	\

