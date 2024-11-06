@@ -6,7 +6,7 @@
 /*   By: nguiard <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/30 13:38:07 by nguiard           #+#    #+#             */
-/*   Updated: 2024/10/30 17:12:32 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/04 14:04:38 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,16 @@
 #define SYS_EXIT		60
 #define SYS_GETDENTS	78
 
+#define get_rip(instruction_pointer)	\
+	asm(								\
+		".intel_syntax noprefix\n"		\
+		"lea rsi, [rip]\n"				\
+		"mov %0, rsi\n"					\
+		".att_syntax prefix\n"			\
+		:	"=r" (instruction_pointer)	\
+		:								\
+		: "rax", "rdi", "rsi", "rdx"	\
+	);
 //	Raw syscalls
 #define sys1_noret(sysnum, first)	\
 	asm(							\

