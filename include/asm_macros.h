@@ -6,7 +6,7 @@
 /*   By: nguiard <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/30 13:38:07 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/04 14:04:38 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/06 10:53:08 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #define SYS_CLOSE		3
 #define SYS_FSTAT		5
 #define SYS_MUNMAP		11
+#define SYS_MREMAP		25
 #define SYS_EXIT		60
 #define SYS_GETDENTS	78
 
@@ -80,6 +81,25 @@
 		: "rdi", "rsi", "rdx", "rax"			\
 	)
 
+#define sys4(ret, sysnum, first, second, third, fourth) \
+	asm(												\
+		".intel_syntax noprefix\n"						\
+		"mov r10, %[d]\n"								\
+		"mov rdx, %[c]\n"								\
+		"mov rsi, %[b]\n"								\
+		"mov rdi, %[a]\n"								\
+		"mov rax, %[num]\n"								\
+		"syscall\n"										\
+		"mov %0, rax\n"									\
+		".att_syntax prefix\n"							\
+		: "=r" (ret)									\
+		: [a] "r" (first),								\
+			[b] "r" (second),							\
+			[c] "r" (third),							\
+			[d] "r" (fourth),							\
+			[num] "r" (sysnum)							\
+		: "rdi", "rsi", "rdx", "rax", "r10"				\
+	)
 //	Syscall functions
 
 #define exit(exit_status) \
@@ -138,5 +158,11 @@
 			(uint64_t)fd,								\
 			(uint64_t)offset							\
 		)
+
+#define mremap(ret, old_addr, old_size, new_size, flags)	\
+		sys4(ret, (uint64_t)SYS_MREMAP,						\
+			(void *)old_addr,								\
+			(uint64_t)old_size,								\
+			(uint64_t)new_size, (uint64_t)flags);
 
 #endif

@@ -16,6 +16,7 @@ SRC	=	$(addsuffix .c,		\
 			profiling		\
 			utils			\
 			infection		\
+			note_segment	\
 		))
 
 NAME	= famine
@@ -30,7 +31,7 @@ INCLUDE = -Iinclude/
 
 CFLAGS	= -Wall -Werror -Wextra -pipe ${INCLUDE} -g3 #-fsanitize=address
 
-all: prod
+all: debug
 
 debug: CFLAGS += -DDEBUG
 debug: fclean ${NAME}

