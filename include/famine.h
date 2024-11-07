@@ -6,7 +6,7 @@
 /*   By: nguiard <nguiard@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/09 03:01:42 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/06 11:00:21 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/07 09:44:48 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,8 +25,9 @@ typedef	char *				str;
 typedef	unsigned char		byte;
 typedef	unsigned __int128	uint128_t;
 
-#define SIGNATURE		"Infected by adben-mc and nguiard ;)"
-#define SIGNATURE_LEN	36
+#define SIGNATURE			"Infected by adben-mc and nguiard ;)"
+#define SIGNATURE_LEN		36
+#define SIGNATURE_OFFSET	8
 
 typedef struct dirent {
 	unsigned long	d_ino;
@@ -77,8 +78,6 @@ typedef struct elf_data {
 #define MREMAP_MAYMOVE	1
 
 #include "asm_macros.h"
-
-#define SIGNATURE_OFFSET	32
 
 //	Utils
 size_t		ft_strlen(str buff);

