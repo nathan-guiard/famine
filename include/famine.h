@@ -6,7 +6,7 @@
 /*   By: nguiard <nguiard@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/09 03:01:42 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/07 09:44:48 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/20 11:53:19 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,8 @@ typedef	unsigned __int128	uint128_t;
 #define SIGNATURE			"Infected by adben-mc and nguiard ;)"
 #define SIGNATURE_LEN		36
 #define SIGNATURE_OFFSET	8
+
+#define	PF_FAMINE			0b10000
 
 typedef struct dirent {
 	unsigned long	d_ino;

