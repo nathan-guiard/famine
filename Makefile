@@ -6,7 +6,7 @@
 #    By: nguiard <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/10/25 15:46:23 by nguiard           #+#    #+#              #
-#    Updated: 2024/11/05 15:54:18 by nguiard          ###   ########.fr        #
+#    Updated: 2024/11/21 13:37:12 by nguiard          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -46,6 +46,7 @@ prod: ${NAME}
 	@chmod o+wr ${<:src/%.s=.obj/%.o}
 
 ${NAME}: ${OBJ}
+	@make -C exemple
 	@echo "Compiling ${NAME}"
 	@${CC} -nostartfiles ${OBJ} ${CFLAGS} -o ${NAME}
 	@echo "${NAME} compiled"
