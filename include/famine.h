@@ -6,7 +6,7 @@
 /*   By: nguiard <nguiard@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/09 03:01:42 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/21 12:32:03 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/25 12:35:32 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,9 +98,6 @@ profiling	get_profiling(byte *start_rip);
 
 //	Note segment
 bool		change_note_segment(profiling *this, elf_data *data);
-
-//	return.s
-void		the_point_of_no_return(bool original);
 
 // Debug purpose
 #ifdef DEBUG

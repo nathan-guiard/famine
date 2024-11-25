@@ -6,7 +6,7 @@
 #    By: nguiard <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/10/25 15:46:23 by nguiard           #+#    #+#              #
-#    Updated: 2024/11/21 13:37:12 by nguiard          ###   ########.fr        #
+#    Updated: 2024/11/25 12:25:44 by nguiard          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -23,7 +23,7 @@ NAME	= famine
 
 SHELL	= /bin/zsh
 
-OBJ		= ${SRC:src/%.c=.obj/%.o} .obj/return.o
+OBJ		= ${SRC:src/%.c=.obj/%.o} .obj/start.o
 
 CC		= gcc
 
