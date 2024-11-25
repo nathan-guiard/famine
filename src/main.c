@@ -6,7 +6,7 @@
 /*   By: nguiard <nguiard@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/09 03:01:26 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/25 12:25:26 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/25 15:39:43 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ void famine() {
 	int64_t		ret = 0;
 	int64_t		fd;
 	byte		buff[BUFF_SIZE];
-	//str		directories[] = {"/tmp/test1", "/tmp/test2", NULL};
+	//str		directories[] = {"/tmp/test", "/tmp/test2", NULL};
 	uint64_t	directories[] = {0x7365742f706d742f, 0x0074, 0x7365742f706d742f, 0x003274, 0, 0};
 	char		max_path[513];
 	dirent		*d;
