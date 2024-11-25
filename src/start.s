@@ -9,9 +9,11 @@ _start:
 	push	rbx
 	push	rcx
 	push	rdx
+	push	rsp
 
 	call	famine	
 
+	pop		rsp
 	pop		rdx
 	pop		rcx
 	pop		rbx

