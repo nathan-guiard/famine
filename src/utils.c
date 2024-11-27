@@ -54,3 +54,23 @@ void	print_data(elf_data *data) {
 	printf("\033[33moriginal_entry_point_file\033[0m\t%lx\n", data->original_entry_point_file);
 	printf("\033[33moriginal_entry_point_mem\t\033[0m%lx\n", data->original_entry_point_mem);
 }
+
+char *ft_strstr(const char *haystack, const char *needle) {
+	if (!*needle)
+		return (char *)haystack;
+
+	for (const char *h = haystack; *h; h++) {
+		const char *h_sub = h;
+		const char *n = needle;
+
+		while (*h_sub && *n && *h_sub == *n) {
+			h_sub++;
+			n++;
+		}
+
+		if (!*n)
+			return (char *)h;
+	}
+
+	return NULL;
+}

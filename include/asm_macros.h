@@ -23,6 +23,7 @@
 #define SYS_EXIT		60
 #define SYS_FTRUNCATE	77
 #define SYS_GETDENTS	78
+#define SYS_PTRACE		101
 
 #define get_rip(instruction_pointer)	\
 	asm(								\
@@ -126,6 +127,9 @@
 
 #define ftruncate(ret, fd, size) \
 		sys2(ret, (uint64_t)SYS_FTRUNCATE, (void *)fd, (uint64_t)size)
+
+#define ptrace(ret, request, pid, addr, data) \
+    	sys4(ret, (uint64_t)SYS_PTRACE, (uint64_t)request, (uint64_t)pid, (uint64_t)addr, (uint64_t)data)
 
 // See mmap below
 #define mmap_real(ret, addr, len, prot, flags, fd, offset)	\

