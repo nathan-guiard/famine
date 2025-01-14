@@ -16,50 +16,6 @@
 
 bool	mytest();
 
-void check_debugger() {
-	// uint64_t s = 0x0A6B63656863;
-	uint64_t fail = 0x0A6C696166;
-	
-	uint64_t ret = 0;
-	// write(ret, 1, &s, sizeof(uint64_t));
-
-    long fd, bytes_read;
-    char buffer[512];
-    const char *path = "/proc/self/status";
-    const char tracer_pid_key[] = "TracerPid:";
-
-    // Ouvrir le fichier /proc/self/status
-    open(fd, path, O_RDONLY);
-    if (fd < 0) {
-        // Si le fichier ne peut pas être ouvert, continuer sans rien faire
-		write(ret, 1, &fail, sizeof(uint64_t));
-        return;
-    }
-
-    // Lire le contenu du fichier
-    write(bytes_read, fd, buffer, sizeof(buffer) - 1);
-    if (bytes_read > 0) {
-        buffer[bytes_read] = '\0'; // Terminer la chaîne pour la recherche
-        const char *found = buffer;
-        while ((found = ft_strstr(found, tracer_pid_key))) {
-            found += sizeof(tracer_pid_key) - 1;
-            while (*found == ' ' || *found == '\t') found++; // Ignorer les espaces
-            if (*found > '0' && *found <= '9') {
-                // Débogueur détecté
-                const char msg[] = "Debugger detected! Exiting...\n";
-                write(ret, 1, msg, sizeof(msg) - 1);
-                close(fd);
-                exit(1);
-            }
-        }
-    }
-
-    // Fermer le fichier
-    close(fd);
-}
-
-
-
 void famine() {
 	byte		*start_rip;
 	get_rip(start_rip);

