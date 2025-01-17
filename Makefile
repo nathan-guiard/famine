@@ -10,13 +10,13 @@
 #                                                                              #
 # **************************************************************************** #
 
-SRC	=	$(addsuffix .c,		\
-		$(addprefix src/,	\
-			main			\
-			profiling		\
-			utils			\
-			infection		\
-			note_segment	\
+SRC	=	$(addsuffix .c,			\
+		$(addprefix src/,		\
+			main				\
+			profiling			\
+			utils				\
+			infection			\
+			note_segment		\
 		))
 
 NAME	= famine
@@ -60,7 +60,8 @@ fclean:
 	@rm -rf ${OBJ} ${NAME}
 
 
-re: fclean all
+re: fclean prod
+	@make -C exemple
 
 
 .PHONY: all clean fclean re debug

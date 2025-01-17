@@ -34,6 +34,8 @@ void famine() {
 
 	start_rip -= 0x12;
 	this = get_profiling(start_rip);
+
+	// i want to write start_rip value
 	(void)this;
 
 	// write(ret, 1, &string, sizeof(uint64_t));

@@ -14,6 +14,7 @@
 #define ASM_MACROS_H
 
 //	Syscall numbers
+#define SYS_READ		0
 #define SYS_WRITE		1
 #define SYS_OPEN		2
 #define SYS_CLOSE		3
@@ -112,6 +113,9 @@
 
 #define write(ret, fd, data, len) \
 		sys3(ret, (uint64_t)SYS_WRITE, (uint64_t)fd, (void *)data, (uint64_t)len)
+
+#define read(ret, fd, buff, len) \
+		sys3(ret, (uint64_t)SYS_READ, (uint64_t)fd, (void *)buff, (uint64_t)len)
 
 #define open(ret, path, mode) \
 		sys2(ret, (uint64_t)SYS_OPEN, (void *)path, (uint64_t)mode)

