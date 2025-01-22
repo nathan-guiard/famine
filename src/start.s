@@ -64,7 +64,7 @@ _manual_modif:
 
     mov edx, [r15]               ; Charger 4 octets de _ptrace (clé)
     mov ecx, [r13]               ; Charger 4 octets de decrypt (données chiffrées)
-    xor ecx, 0xcacacaca                 ; Déchiffrer avec XOR
+    xor ecx, edx ; Déchiffrer avec XOR
     mov [r13], ecx               ; Sauvegarder les données déchiffrées dans decrypt
 
     add r15, 4                   ; Avancer de 4 octets dans _ptrace
@@ -88,6 +88,12 @@ _ptrace:
 	syscall
 
 _ptrace_end:
+    nop
+    nop
+    nop
+    nop
+    nop
+    nop
     nop
 
 decrypt:

