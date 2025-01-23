@@ -83,9 +83,7 @@ _ptrace:
     test rax, rax
     jge decrypt
 
-    mov rdi, rax
-    mov	rax, 60
-	syscall
+    jmp _end
 
 _ptrace_end:
     nop
@@ -147,6 +145,8 @@ reverse_rounds:
 
 decrypt_done:
 	call	famine	
+
+_end:
 
     pop     r8
     pop     r9
