@@ -19,10 +19,10 @@ echo
 echo "Hello (not infected)"
 /tmp/test/hello
 
-# echo
-# echo "infection de hello"
-# ./famine
+echo
+echo "infection de hello"
+/tmp/test/hello_world
 
-# echo
-# echo "hello (infected)"
-# /tmp/test/hello
+echo
+echo "hello (infected)"
+/tmp/test/hello
