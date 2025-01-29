@@ -38,19 +38,3 @@ void	ft_memcpy(byte *dest, const byte *src, size_t size) {
 	for (size_t i = 0; i < size; i++)
 		dest[i] = src[i];
 }
-
-void	print_data(elf_data *data) {
-	(void)data;
-	printf("Data:\n");
-	printf("elf\t\t\t\t%p\n", data->elf);
-	printf("sections\t\t\t%p\n", data->sections);
-	printf("segments\t\t\t%p\n", data->segments);
-	printf("file\t\t\t\t%p\n", data->file);
-	printf("fd\t\t\t\t%d\n", (int)data->fd);
-	printf("\033[34msignature_offset_file\033[0m\t\t%lx\n", data->signature_offset_file);
-	printf("\033[34msignature_offset_mem\t\t\033[0m%lx\n", data->signature_offset_mem);
-	printf("\033[2;32minfection_offset_file\033[0m\t\t%lx\n", data->infection_offset_file);
-	printf("\033[2;32minfection_offset_mem\t\t\033[0m%lx\n", data->infection_offset_mem);
-	printf("\033[33moriginal_entry_point_file\033[0m\t%lx\n", data->original_entry_point_file);
-	printf("\033[33moriginal_entry_point_mem\t\033[0m%lx\n", data->original_entry_point_mem);
-}
