@@ -1,4 +1,4 @@
-fin = int("2551", 16) + 2
+fin = int("252b", 16) + 2
 
 
 
@@ -9,7 +9,7 @@ ptrace_end = fin - (int("2455", 16))
 decrypt_start = fin - (int("248d", 16))
 key = fin - (int("249b", 16) + 2)
 
-final_jmp = fin - (int("2542", 16) + 1)
+final_jmp = fin - (int("251c", 16) + 1)
 
 print("final_jmp: ", final_jmp)
 print("original_jmp: ", original_jmp)

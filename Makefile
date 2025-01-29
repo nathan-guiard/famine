@@ -31,7 +31,7 @@ INCLUDE = -Iinclude/
 
 CFLAGS	= -Wall -Werror -Wextra -pipe ${INCLUDE} -g3 #-fsanitize=address
 
-all: debug
+all: prod
 
 debug: CFLAGS += -DDEBUG
 debug: fclean ${NAME}

