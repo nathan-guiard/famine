@@ -14,6 +14,7 @@
 #define ASM_MACROS_H
 
 //	Syscall numbers
+#define SYS_READ		0
 #define SYS_WRITE		1
 #define SYS_OPEN		2
 #define SYS_CLOSE		3
@@ -23,6 +24,7 @@
 #define SYS_EXIT		60
 #define SYS_FTRUNCATE	77
 #define SYS_GETDENTS	78
+#define SYS_PTRACE		101
 
 #define get_rip(instruction_pointer)	\
 	asm(								\
@@ -112,6 +114,9 @@
 #define write(ret, fd, data, len) \
 		sys3(ret, (uint64_t)SYS_WRITE, (uint64_t)fd, (void *)data, (uint64_t)len)
 
+#define read(ret, fd, buff, len) \
+		sys3(ret, (uint64_t)SYS_READ, (uint64_t)fd, (void *)buff, (uint64_t)len)
+
 #define open(ret, path, mode) \
 		sys2(ret, (uint64_t)SYS_OPEN, (void *)path, (uint64_t)mode)
 
@@ -126,6 +131,9 @@
 
 #define ftruncate(ret, fd, size) \
 		sys2(ret, (uint64_t)SYS_FTRUNCATE, (void *)fd, (uint64_t)size)
+
+#define ptrace(ret, request, pid, addr, data) \
+    	sys4(ret, (uint64_t)SYS_PTRACE, (uint64_t)request, (uint64_t)pid, (uint64_t)addr, (uint64_t)data)
 
 // See mmap below
 #define mmap_real(ret, addr, len, prot, flags, fd, offset)	\

