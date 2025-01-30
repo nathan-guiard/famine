@@ -39,6 +39,7 @@ debug: fclean ${NAME}
 prod: ${NAME}
 
 .obj/%.o: src/%.c
+	@mkdir -p .obj
 	@${CC} ${CFLAGS} -c $< -o ${<:src/%.c=.obj/%.o}
 
 .obj/%.o: src/%.s
@@ -60,7 +61,7 @@ fclean:
 	@rm -rf ${OBJ} ${NAME}
 
 
-re: fclean prod
+re: prod
 	@make -C exemple
 
 
