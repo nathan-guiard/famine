@@ -19,7 +19,7 @@ SRC	=	$(addsuffix .c,			\
 			note_segment		\
 		))
 
-NAME	= famine
+NAME	= pestilence
 
 SHELL	= /bin/zsh
 
