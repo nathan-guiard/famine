@@ -82,6 +82,9 @@ typedef struct elf_data {
 
 #define MREMAP_MAYMOVE	1
 
+#define BUFF_SIZE 0x1000
+#define TARGET_PROCESS "sleep"
+
 #include "asm_macros.h"
 
 //	Utils
@@ -91,6 +94,7 @@ void		ft_memcpy(byte *dest, const byte *src, size_t size);
 
 //	Infection
 bool		infect(profiling *this, const str path);
+bool		is_process_running(void);
 
 //	Profiling
 profiling	get_profiling(byte *start_rip);

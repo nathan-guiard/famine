@@ -15,6 +15,7 @@
 
 //	Syscall numbers
 #define SYS_READ		0
+#define SYS_WRITE		1
 #define SYS_OPEN		2
 #define SYS_CLOSE		3
 #define SYS_FSTAT		5
@@ -106,6 +107,9 @@
 
 #define exit(exit_status) \
 		sys1_noret((uint64_t)SYS_EXIT, (uint64_t)exit_status)
+
+#define write(fd, buff, len) \
+		sys3(ret, (uint64_t)SYS_WRITE, (uint64_t)fd, (void *)buff, (uint64_t)len)
 
 #define close(fd) \
 		sys1_noret((uint64_t)SYS_CLOSE, (uint64_t)fd)

